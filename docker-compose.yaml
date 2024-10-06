@@ -1,0 +1,84 @@
+volumes:
+  postgres-data:
+  mongo-data:
+  rabbitmq_data:
+  keycloak_data:
+
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "0322"
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    restart: always
+    ports:
+      - "5439:5432"
+    volumes:
+      - ./postgresql:/var/lib/postgresql/data
+
+  mongo:
+    image: mongo:8.0.0
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: "root"
+      MONGO_INITDB_ROOT_PASSWORD: "0322"
+    volumes:
+      - mongo-data:/data/db
+
+  mongo-express:
+    image: mongo-express:latest
+    container_name: mongo-express
+    ports:
+      - "8081:8081"
+    depends_on:
+      - mongo
+    environment:
+      ME_CONFIG_MONGODB_SERVER: "mongo"
+      ME_CONFIG_MONGODB_PORT: "27017"
+      ME_CONFIG_MONGODB_ADMINUSERNAME: "root"
+      ME_CONFIG_MONGODB_ADMINPASSWORD: "0322"
+  #todo вынести все чувствительные данные в .env
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+  keycloak_db:
+    image: postgres:16-alpine
+    container_name: keycloak_db
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: trust
+      POSTGRES_USER: "keycloak_postgres"
+      POSTGRES_DB: "keycloak"
+    ports:
+      - "5434:5432"
+    volumes:
+      - keycloak_data:/var/lib/postgresql/data
+
+  keycloak:
+    image: bitnami/keycloak:25
+    container_name: keycloak
+    depends_on:
+      - keycloak_db
+    environment:
+      KEYCLOAK_DATABASE_HOST: "keycloak_db"
+      KEYCLOAK_DATABASE_PORT: "5432"
+      KEYCLOAK_DATABASE_NAME: "keycloak"
+      KEYCLOAK_DATABASE_USER: "keycloak_postgres"
+      KEYCLOAK_DATABASE_PASSWORD:
+      KEYCLOAK_DATABASE_SCHEMA: "public"
+      KEYCLOAK_ADMIN_USER: "aboldyrev"
+      KEYCLOAK_ADMIN_PASSWORD: "changeme"
+    ports:
+      - "8910:8080"
