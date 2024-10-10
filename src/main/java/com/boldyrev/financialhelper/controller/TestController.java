@@ -10,6 +10,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+/**
+ * //todo add description
+ *
+ * @author Alexandr Boldyrev
+ */
 @RestController
 @RequestMapping("/")
 @RequiredArgsConstructor

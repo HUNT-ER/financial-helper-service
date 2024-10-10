@@ -9,6 +9,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 
+/**
+ * //todo add description
+ *
+ * @author Alexandr Boldyrev
+ */
 @Configuration
 public class SpringSecurityConfig {
 
