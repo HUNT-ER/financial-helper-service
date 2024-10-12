@@ -56,12 +56,12 @@ tasks.named('test') {
 }
 
 openApiGenerate {
-    generatorName = "spring"  // Генератор для Spring
-    inputSpec = "$rootDir/src/main/resources/openapi/openapi.yaml"  // Путь к спецификации OpenAPI
-    outputDir =  "$projectDir/build/generated"  // Папка для сгенерированного кода
-    apiPackage = "com.boldyrev.controller"  // Пакет для контроллеров (API)
-    modelPackage = "com.boldyrev.dto"  // Пакет для моделей
-    library = "spring-boot"  // Указываем использовать Spring Boot
+    generatorName = "spring"
+    inputSpec = "$rootDir/src/main/resources/openapi/api.yaml"
+    outputDir =  "$projectDir/build/generated"
+    apiPackage = "com.boldyrev.controller"
+    modelPackage = "com.boldyrev.dto"
+    library = "spring-boot"
     configOptions = [
             reactive: "true",
             additionalModelTypeAnnotations: "@lombok.experimental.SuperBuilder;@lombok.NoArgsConstructor;@lombok.AllArgsConstructor",

@@ -1,0 +1,123 @@
+databaseChangeLog:
+  - changeSet:
+      id: createTransactionCategoriesTable
+      author: a.boldyrev
+      changes:
+        - createTable:
+            tableName: transaction_categories
+            columns:
+              - column:
+                  name: category_id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                  defaultValueComputed: gen_random_uuid()
+              - column:
+                  name: category_name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_expense
+                  type: boolean
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamp
+                  constraints:
+                    nullable: false
+              - column:
+                  name: modified_at
+                  type: timestamp
+                  constraints:
+                    nullable: false
+  - changeSet:
+      id: createTransactionsTable
+      author: a.boldyrev
+      changes:
+        - createTable:
+            tableName: transactions
+            columns:
+              - column:
+                  name: transaction_id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                    defaultValueComputed: gen_random_uuid()
+              - column:
+                  name: category_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_category_id
+                    references: transaction_categories(category_id)
+              - column:
+                  name: user_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: transaction_type
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: amount
+                  type: decimal(10, 2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamp
+                  constraints:
+                    nullable: false
+              - column:
+                  name: modified_at
+                  type: timestamp
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: createSpendingLimitsTable
+      author: a.boldyrev
+      changes:
+        - createTable:
+            tableName: spending_limits
+            columns:
+              - column:
+                  name: limit_id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                    defaultValueComputed: gen_random_uuid()
+              - column:
+                  name: category_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_category_id
+                    references: transaction_categories(category_id)
+              - column:
+                  name: user_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: limit
+                  type: decimal(10, 2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamp
+                  constraints:
+                    nullable: false
+              - column:
+                  name: modified_at
+                  type: timestamp
+                  constraints:
+                    nullable: false

@@ -2,6 +2,13 @@ spring:
   application:
     name: financial-helper
 
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+    url: jdbc:postgresql://localhost:5439/finance-helper
+    user: "postgres"
+    password: "0322"
+
   security:
     oauth2:
       resourceserver:
@@ -10,9 +17,9 @@ spring:
           jwk-set-uri: http://localhost:8910/realms/finance/protocol/openid-connect/certs
 
   r2dbc:
-    url: r2dbc:postgresql://localhost:5438/finance-helper
-    username: postgres
-    password: 0322
+    url: r2dbc:postgresql://localhost:5439/finance-helper
+    username: "postgres"
+    password: "0322"
     pool:
       enabled: true
 
