@@ -11,7 +11,7 @@ import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
 /**
- * //todo add descriprion
+ * Representation of transaction by user and category.
  *
  * @author Alexandr Boldyrev
  */

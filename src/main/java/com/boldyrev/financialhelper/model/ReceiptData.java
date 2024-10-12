@@ -1,11 +1,12 @@
 package com.boldyrev.financialhelper.model;
 
+import com.boldyrev.financialhelper.enums.OperationType;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import lombok.Data;
 
 /**
- * //todo add description
+ * Representation of receipt document data, including items and metadata.
  *
  * @author Alexandr Boldyrev
  */
@@ -76,7 +77,7 @@ public class ReceiptData {
     private double ecashTotalSum;
 
     @JsonProperty("operationType")
-    private int operationType;
+    private OperationType operationType;
 
     @JsonProperty("redefineMask")
     private int redefineMask;

@@ -3,7 +3,7 @@ package com.boldyrev.financialhelper.config;
 import org.springframework.data.mongodb.config.EnableReactiveMongoAuditing;
 
 /**
- * //todo add description
+ * MongoDB auditing configuration.
  *
  * @author Alexandr Boldyrev
  */

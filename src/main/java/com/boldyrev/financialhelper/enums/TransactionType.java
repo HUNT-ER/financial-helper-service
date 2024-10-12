@@ -1,7 +1,7 @@
 package com.boldyrev.financialhelper.enums;
 
 /**
- * //todo add description
+ * Transaction type.
  *
  * @author Alexandr Boldyrev
  */

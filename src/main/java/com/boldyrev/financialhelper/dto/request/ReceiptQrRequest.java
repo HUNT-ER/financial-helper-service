@@ -3,7 +3,7 @@ package com.boldyrev.financialhelper.dto.request;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * //todo add description
+ * Request DTO for {@code proverkacheka.com} API.
  *
  * @author Alexandr Boldyrev
  */

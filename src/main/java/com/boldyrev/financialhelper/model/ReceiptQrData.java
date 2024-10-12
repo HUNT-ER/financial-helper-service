@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 /**
- * //todo add description
+ * Representation of receipt QR-code data.
  *
  * @author Alexandr Boldyrev
  */

@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * //todo add description
+ * Response DTO for {@code proverkacheka.com} API.
  *
  * @author Alexandr Boldyrev
  */

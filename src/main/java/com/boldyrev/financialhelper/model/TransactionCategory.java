@@ -10,7 +10,7 @@ import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
 /**
- * //todo add description
+ * Representation of transaction category.
  *
  * @author Alexandr Boldyrev
  */

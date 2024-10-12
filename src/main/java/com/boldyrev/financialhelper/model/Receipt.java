@@ -8,7 +8,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 /**
- * //todo add description
+ * Representation of receipt document.
  *
  * @author Alexandr Boldyrev
  */
