@@ -1,13 +1,18 @@
 package com.boldyrev.financialhelper.service;
 
-import com.boldyrev.financialhelper.dto.QrCodeReceiptDto;
+import com.boldyrev.financialhelper.dto.QrCodeReceiptMessageDto;
 
 /**
- * //todo add description
+ * Service with business logic to process QR-code receipts.
  *
  * @author Alexandr Boldyrev
  */
 public interface ReceiptsService {
 
-    void processQrCodeReceipt(QrCodeReceiptDto receiptDto);
+    /**
+     * Process QR-code receipt.
+     *
+     * @param receiptDto message with QR-code receipt.
+     */
+    void processQrCodeReceipt(QrCodeReceiptMessageDto receiptDto);
 }
