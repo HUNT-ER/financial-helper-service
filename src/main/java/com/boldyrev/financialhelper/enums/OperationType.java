@@ -1,13 +1,12 @@
 package com.boldyrev.financialhelper.enums;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonCreator.Mode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 /**
  * Operation type of receipts.
- * <p>
- * EXCHANGE category can't be processed because it's not income or expense transaction.
  *
  * @author Alexandr Boldyrev
  */
@@ -15,18 +14,18 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum OperationType {
 
-    PURCHASE(1, true, true),
-    RETURN(2, false, true),
-    EXCHANGE(3, false, false),
-    ADVANCE(4, true, true),
-    ADDITIONAL_SERVICE(5, true, true),
-    WRITE_OFF(6, true, true);
+    PURCHASE(1, TransactionType.EXPENSE),
+    RETURN(2, TransactionType.INCOME),
+    EXCHANGE(3, TransactionType.TRANSFER),
+    ADVANCE(4, TransactionType.EXPENSE),
+    ADDITIONAL_SERVICE(5, TransactionType.EXPENSE),
+    WRITE_OFF(6, TransactionType.EXPENSE);
 
     private final int code;
-    private final boolean isExpense;
-    private final boolean isTransaction;
 
-    @JsonCreator
+    private final TransactionType transactionType;
+
+    @JsonCreator(mode = Mode.DELEGATING)
     public static OperationType fromCode(int code) {
         for (OperationType type : OperationType.values()) {
             if (type.code == code) {

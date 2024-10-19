@@ -7,6 +7,7 @@ package com.boldyrev.financialhelper.enums;
  */
 public enum TransactionType {
     INCOME,
-    EXPENSE
+    EXPENSE,
+    TRANSFER
 }
 

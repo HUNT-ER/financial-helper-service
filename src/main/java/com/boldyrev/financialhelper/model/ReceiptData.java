@@ -2,6 +2,7 @@ package com.boldyrev.financialhelper.model;
 
 import com.boldyrev.financialhelper.enums.OperationType;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.time.Instant;
 import java.util.List;
 import lombok.Data;
 
@@ -35,7 +36,7 @@ public class ReceiptData {
     private String userInn;
 
     @JsonProperty("dateTime")
-    private String dateTime;
+    private Instant dateTime;
 
     @JsonProperty("kktRegId")
     private String kktRegId;
