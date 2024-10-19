@@ -1,5 +1,6 @@
 package com.boldyrev.financialhelper.dto.response;
 
+import com.boldyrev.financialhelper.enums.OperationType;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import lombok.Data;
@@ -12,7 +13,7 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-public class ReceiptQrResponse {
+public class ReceiptQrResponseDto {
 
     @JsonProperty("code")
     private int code;
@@ -65,7 +66,7 @@ public class ReceiptQrResponse {
             private String kktRegId;
 
             @JsonProperty("metadata")
-            private MetadataDTO metadata;
+            private MetadataDto metadata;
 
             @JsonProperty("operator")
             private String operator;
@@ -101,7 +102,7 @@ public class ReceiptQrResponse {
             private int ecashTotalSum;
 
             @JsonProperty("operationType")
-            private int operationType;
+            private OperationType operationType;
 
             @JsonProperty("redefine_mask")
             private int redefineMask;
@@ -162,13 +163,13 @@ public class ReceiptQrResponse {
                 private int productType;
 
                 @JsonProperty("productCodeNew")
-                private ProductCodeNewDTO productCodeNew;
+                private ProductCodeNewDto productCodeNew;
 
                 @JsonProperty("labelCodeProcesMode")
                 private int labelCodeProcessMode;
 
                 @JsonProperty("itemsIndustryDetails")
-                private List<ItemsIndustryDetailsDTO> itemsIndustryDetails;
+                private List<ItemsIndustryDetailsDto> itemsIndustryDetails;
 
                 @JsonProperty("itemsQuantityMeasure")
                 private int itemsQuantityMeasure;
@@ -178,12 +179,12 @@ public class ReceiptQrResponse {
 
                 @Data
                 @NoArgsConstructor
-                public static class ProductCodeNewDTO {
+                public static class ProductCodeNewDto {
 
                     @JsonProperty("gs1m")
-                    private Gs1mDTO gs1m;
+                    private Gs1mDto gs1m;
 
-                    public static class Gs1mDTO {
+                    public static class Gs1mDto {
 
                         @JsonProperty("gtin")
                         private String gtin;
@@ -201,7 +202,7 @@ public class ReceiptQrResponse {
 
                 @Data
                 @NoArgsConstructor
-                public static class ItemsIndustryDetailsDTO {
+                public static class ItemsIndustryDetailsDto {
 
                     @JsonProperty("idFoiv")
                     private String idFoiv;
@@ -219,7 +220,7 @@ public class ReceiptQrResponse {
 
             @Data
             @NoArgsConstructor
-            public static class MetadataDTO {
+            public static class MetadataDto {
 
                 @JsonProperty("id")
                 private long id;
@@ -240,11 +241,11 @@ public class ReceiptQrResponse {
     }
 
     @JsonProperty("request")
-    private ReceiptRequestDTO request;
+    private ReceiptRequestDto request;
 
     @Data
     @NoArgsConstructor
-    public static class ReceiptRequestDTO {
+    public static class ReceiptRequestDto {
 
         @JsonProperty("qrurl")
         private String qrUrl;
@@ -256,11 +257,11 @@ public class ReceiptQrResponse {
         private String qrRaw;
 
         @JsonProperty("manual")
-        private ManualDTO manual;
+        private ManualDto manual;
 
         @Data
         @NoArgsConstructor
-        public static class ManualDTO {
+        public static class ManualDto {
 
             @JsonProperty("fn")
             private String fn;

@@ -7,5 +7,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  *
  * @author Alexandr Boldyrev
  */
-public record ReceiptQrRequest(@JsonProperty("qrraw") String qrRaw, String token) {
+public record ReceiptQrRequestDto(@JsonProperty("qrraw") String qrRaw,
+                                  @JsonProperty("token") String token) {
 }

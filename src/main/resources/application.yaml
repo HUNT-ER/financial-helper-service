@@ -1,25 +1,25 @@
 spring:
   application:
     name: financial-helper
-
+  #todo вынести все чувствительные данные в .env
   liquibase:
     enabled: true
     change-log: classpath:db/changelog/db.changelog-master.yaml
-    url: jdbc:postgresql://localhost:5439/finance-helper
-    user: "postgres"
-    password: "0322"
+    url: jdbc:postgresql://${DATABASE_HOST:localhost}:${DATABASE:5439}/${DATABASE_NAME:finance-helper}
+    user: ${DATABASE_USERNAME:postgres}
+    password: ${DATABASE_PASSWORD:0322}
 
   security:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:8910/realms/finance
-          jwk-set-uri: http://localhost:8910/realms/finance/protocol/openid-connect/certs
+          issuer-uri: http://${AUTH_PROVIDER_HOST:localhost}:${AUTH_PROVIDER_PORT:8910}/realms/finance
+          jwk-set-uri: http://${AUTH_PROVIDER_HOST:localhost}:${AUTH_PROVIDER_PORT:8910}/realms/finance/protocol/openid-connect/certs
 
   r2dbc:
-    url: r2dbc:postgresql://localhost:5439/finance-helper
-    username: "postgres"
-    password: "0322"
+    url: r2dbc:postgresql://${DATABASE_HOST:localhost}:${DATABASE:5439}/${DATABASE_NAME:finance-helper}
+    username: ${DATABASE_USERNAME:postgres}
+    password: ${DATABASE_PASSWORD:0322}
     pool:
       enabled: true
 
@@ -27,16 +27,20 @@ spring:
     r2dbc:
       repositories:
         enabled: true
+
     mongodb:
-      uri: mongodb://localhost:27017/financial-helper
-      username: root
-      password: 0322
+      host: ${MONGODB_HOST:localhost}
+      port: ${MONGODB_PORT:27017}
+      database: ${MONGODB_DATABASE:financial-helper}
+      username: ${MONGODB_USERNAME:root}
+      password: ${MONGODB_PASSWORD:0322}
+      authentication-database: ${MONGODB_AUTH_DATABASE:admin}
 
   rabbitmq:
-    host: localhost
-    port: 5672
-    username: admin
-    password: admin
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:admin}
+    password: ${RABBITMQ_PASSWORD:admin}
 
 springdoc:
   api-docs:
@@ -51,6 +55,9 @@ info:
     version: 0.0.1
 
 app:
+  qr-receipt:
+    reading-api-url: ${QR_CODE_READING_RECEIPT_API}
+    reading-api-token: ${QR_CODE_READING_RECEIPT_API_TOKEN}
   rabbitmq:
     queue: fm-common
     exchange: fm-exchange

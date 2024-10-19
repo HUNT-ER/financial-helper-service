@@ -1,6 +1,7 @@
 package com.boldyrev.financialhelper.enums;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonCreator.Mode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -24,7 +25,7 @@ public enum OperationType {
 
     private final TransactionType transactionType;
 
-    @JsonCreator
+    @JsonCreator(mode = Mode.DELEGATING)
     public static OperationType fromCode(int code) {
         for (OperationType type : OperationType.values()) {
             if (type.code == code) {

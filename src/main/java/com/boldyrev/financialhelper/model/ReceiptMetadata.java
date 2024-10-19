@@ -1,6 +1,7 @@
 package com.boldyrev.financialhelper.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.time.Instant;
 import lombok.Data;
 
 /**
@@ -24,7 +25,7 @@ public class ReceiptMetadata {
     private String subtype;
 
     @JsonProperty("receiveDate")
-    private String receiveDate;
+    private Instant receiveDate;
 }
 
 
