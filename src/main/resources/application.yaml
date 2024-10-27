@@ -28,6 +28,13 @@ spring:
       repositories:
         enabled: true
 
+    redis:
+      database: 0
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:pass}
+      connect-timeout: 60000
+
     mongodb:
       host: ${MONGODB_HOST:localhost}
       port: ${MONGODB_PORT:27017}
@@ -62,3 +69,10 @@ app:
     queue: fm-common
     exchange: fm-exchange
   dev-profile: ${IS_DEV_PROFILE:false}
+  gigachat:
+    generation-model: ${GIGACHAT_GENERATION_MODEL}
+    generation-api-url: ${GIGACHAT_GENERATION_API_URL}
+    auth-url: ${GIGACHAT_AUTH_URL}
+    auth-token: ${GIGACHAT_AUTH_TOKEN}
+    generation-categories-prompt: ${GIGACHAT_GENERATION_PROMPT}
+    api-scope: GIGACHAT_API_PERS

@@ -10,30 +10,38 @@ import com.google.zxing.common.HybridBinarizer;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import javax.imageio.ImageIO;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 /**
  * Implementation of {@link QrCodeService} with ZXing library.
  *
  * @author Alexandr Boldyrev
  */
+@Slf4j
 @Service
 public class ZXingQrCodeServiceImpl implements QrCodeService {
 
     @Override
     public Mono<String> readQrCode(byte[] bytes) {
+        log.debug("Starting read QR code");
+
         return Mono.fromCallable(() -> {
-            try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes)) {
-                BufferedImage bufferedImage = ImageIO.read(bais);
-                BufferedImageLuminanceSource source = new BufferedImageLuminanceSource(bufferedImage);
-                BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
+                try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes)) {
+                    BufferedImage bufferedImage = ImageIO.read(bais);
+                    BufferedImageLuminanceSource source = new BufferedImageLuminanceSource(
+                        bufferedImage);
+                    BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
 
-                MultiFormatReader reader = new MultiFormatReader();
-                Result result = reader.decode(bitmap);
+                    MultiFormatReader reader = new MultiFormatReader();
+                    Result result = reader.decode(bitmap);
 
-                return result.getText();
-            }
-        }).onErrorMap(ex -> new QrCodeReadingException(ex.getMessage(), ex));
+                    return result.getText();
+                }
+            })
+            .onErrorMap(ex -> new QrCodeReadingException(ex.getMessage(), ex))
+            .subscribeOn(Schedulers.boundedElastic());
     }
 }

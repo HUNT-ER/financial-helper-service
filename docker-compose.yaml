@@ -82,3 +82,13 @@ services:
       KEYCLOAK_ADMIN_PASSWORD: "changeme"
     ports:
       - "8910:8080"
+
+  redis:
+    image: redis:7.4.1
+    container_name: redis
+    ports:
+      - "6379:6379"
+    environment:
+      - REDIS_PASSWORD=pass
+    command: ["redis-server", "--requirepass", "$REDIS_PASSWORD"]
+    restart: always
