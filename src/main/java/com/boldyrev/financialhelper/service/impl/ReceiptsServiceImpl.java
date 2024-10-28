@@ -4,6 +4,7 @@ import com.boldyrev.financialhelper.config.QrCodeReceiptApiProperties;
 import com.boldyrev.financialhelper.dto.QrCodeReceiptMessageDto;
 import com.boldyrev.financialhelper.dto.request.ReceiptQrRequestDto;
 import com.boldyrev.financialhelper.dto.response.ReceiptQrResponseDto;
+import com.boldyrev.financialhelper.exception.IncorrectCategorizationResponseException;
 import com.boldyrev.financialhelper.exception.QrCodeReadingException;
 import com.boldyrev.financialhelper.exception.ReceiptAlreadyExistsException;
 import com.boldyrev.financialhelper.mapper.ReceiptMapper;
@@ -11,6 +12,7 @@ import com.boldyrev.financialhelper.model.Receipt;
 import com.boldyrev.financialhelper.model.ReceiptQrData;
 import com.boldyrev.financialhelper.repository.ReceiptsRepository;
 import com.boldyrev.financialhelper.service.QrCodeService;
+import com.boldyrev.financialhelper.service.ReceiptItemsCategorizationService;
 import com.boldyrev.financialhelper.service.ReceiptsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +40,8 @@ public class ReceiptsServiceImpl implements ReceiptsService {
 
     private final QrCodeService qrCodeService;
 
+    private final ReceiptItemsCategorizationService categorizationService;
+
     @Override
     public void processQrCodeReceipt(QrCodeReceiptMessageDto receiptDto) {
         qrCodeService.readQrCode(receiptDto.getQrCodeImage())
@@ -46,11 +50,19 @@ public class ReceiptsServiceImpl implements ReceiptsService {
             .doOnNext(receipt -> receipt.setUserId(receiptDto.getUserId()))
             .flatMap(this::throwIfExists)
             .flatMap(this::save)
+            .flatMap(receipt -> categorizationService.categorizeItems(
+                receipt.getReceiptData().getItems()))
             .doOnError(ReceiptAlreadyExistsException.class,
                 ex -> log.error("Existed receipt: %s".formatted(ex.getMessage()), ex))
             .doOnError(QrCodeReadingException.class,
                 ex -> log.error("Bad QR: %s".formatted(ex.getMessage()), ex))
+            .doOnError(IncorrectCategorizationResponseException.class,
+                ex -> log.error("Bad GigaChat response: %s".formatted(ex.getMessage()), ex))
             .subscribe();
+        // всё категоризируется, дальше надо сохранить транзакцию
+        // сформировать html страницу
+        // отправить уведомление
+        // отправить неуспешно уведомление
     }
 
     Mono<Receipt> throwIfExists(Receipt receipt) {
@@ -83,7 +95,8 @@ public class ReceiptsServiceImpl implements ReceiptsService {
     }
 
     Mono<Receipt> save(Receipt receipt) {
-        log.debug("New receipt successfully saved: userId:{}, receiptQrData:{}", receipt.getUserId(),
+        log.debug("New receipt successfully saved: userId:{}, receiptQrData:{}",
+            receipt.getUserId(),
             receipt.getReceiptQrData());
 
         return receiptsRepository.save(receipt);

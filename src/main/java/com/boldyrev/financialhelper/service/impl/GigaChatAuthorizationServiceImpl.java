@@ -4,13 +4,14 @@ import com.boldyrev.financialhelper.config.GigaChatProperties;
 import com.boldyrev.financialhelper.dto.AuthTokenDto;
 import com.boldyrev.financialhelper.service.AuthorizationService;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
@@ -52,13 +53,13 @@ public class GigaChatAuthorizationServiceImpl implements AuthorizationService {
     }
 
     private Mono<AuthTokenDto> fetchToken() {
-        Map<String, String> body = new HashMap<>();
-        body.put("scope", properties.getApiScope());
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+        body.put("scope", List.of(properties.getApiScope()));
 
         return webClient.post()
             .uri(properties.getAuthUrl())
             .header("rquid", UUID.randomUUID().toString())
-            .header("Authorization", "Basic %s".formatted(properties.getAuthToken()))
+            .header("Authorization", "Bearer %s".formatted(properties.getAuthToken()))
             .contentType(MediaType.APPLICATION_FORM_URLENCODED)
             .bodyValue(body)
             .retrieve()
