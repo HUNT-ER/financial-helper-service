@@ -26,9 +26,10 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 /**
- * //todo add description
+ * Service for categorization items with GigaChat AI.
  *
  * @author Alexandr Boldyrev
+ * @see <a href="https://giga.chat/">GigaChat</a>
  */
 @Slf4j
 @Service
@@ -71,17 +72,7 @@ public class GigaChatReceiptItemCategorizationServiceImpl implements
             .flatMap(categoriesTemplate -> sendGenerationRequest(categoriesTemplate.toString(),
                 templateItems.toString()))
             .flatMap(this::parseCategorizationResponse)
-            .flatMap(mappedCategories ->
-                categoriesService.getDefaultCategory()
-                    .flatMap(defaultCategory -> {
-                        HashMap<String, TransactionCategory> result = new HashMap<>();
-                        itemsMapping.forEach((key, value) -> {
-                            TransactionCategory category = categories.getOrDefault(
-                                mappedCategories.getOrDefault(key, "UNMAPPED"), defaultCategory);
-                            result.put(value, category);
-                        });
-                        return Mono.just(result);
-                    }));
+            .flatMap(categorizedItems -> mapItemsWithCategories(itemsMapping, categorizedItems, categories));
     }
 
 
@@ -130,7 +121,7 @@ public class GigaChatReceiptItemCategorizationServiceImpl implements
                     response.getMessage().getContent().split(", "))
                 .filter(item -> {
                     try {
-                        Integer.parseInt(item.substring(0, item.charAt(':')));
+                        Integer.parseInt(item.substring(0, item.indexOf(':')));
                         return true;
                     } catch (Exception e) {
                         log.debug("Incorrect generated value: {}", item);
@@ -138,11 +129,38 @@ public class GigaChatReceiptItemCategorizationServiceImpl implements
                     }
                 })
                 .collect(
-                    Collectors.toMap(key -> Integer.parseInt(key.substring(0, key.charAt(':'))),
-                        value -> value.substring(value.charAt(':') + 1))));
+                    Collectors.toMap(
+                        // Maps each value (ex. 1:Other) like key='1' and value='Other'
+                        key -> Integer.parseInt(key.substring(0, key.indexOf(':'))),
+                        value -> value.substring(value.indexOf(':') + 1))
+                )
+            );
 
         }
 
         return Mono.error(new IncorrectCategorizationResponseException("Could not parse response"));
+    }
+
+    /**
+     * Map categorized items from numbers to name from receipt.
+     *
+     * @param itemsMapping item name with its number, that sending to categorization.
+     * @param categorizedItems item number with mapped category.
+     * @param categories map all {@link TransactionCategory} with its names {@link TransactionCategory#getCategoryName()}
+     * @return map with item raw name from receipt with mapped {@link TransactionCategory}.
+     */
+    private Mono<Map<String, TransactionCategory>> mapItemsWithCategories(
+        Map<Integer, String> itemsMapping, Map<Integer, String> categorizedItems, HashMap<String,
+        TransactionCategory> categories) {
+        return categoriesService.getDefaultCategory()
+            .flatMap(defaultCategory -> {
+                HashMap<String, TransactionCategory> result = new HashMap<>();
+                itemsMapping.forEach((key, value) -> {
+                    TransactionCategory category = categories.getOrDefault(
+                        categorizedItems.getOrDefault(key, "UNMAPPED"), defaultCategory);
+                    result.put(value, category);
+                });
+                return Mono.just(result);
+            });
     }
 }

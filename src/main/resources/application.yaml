@@ -76,3 +76,4 @@ app:
     auth-token: ${GIGACHAT_AUTH_TOKEN}
     generation-categories-prompt: ${GIGACHAT_GENERATION_PROMPT}
     api-scope: GIGACHAT_API_PERS
+  default-category: ${DEFAULT_CATEGORY:Other}

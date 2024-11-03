@@ -17,6 +17,7 @@ import com.boldyrev.financialhelper.service.ReceiptsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.reactive.TransactionalOperator;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
@@ -42,6 +43,8 @@ public class ReceiptsServiceImpl implements ReceiptsService {
 
     private final ReceiptItemsCategorizationService categorizationService;
 
+    private final TransactionalOperator transactionalOperator;
+
     @Override
     public void processQrCodeReceipt(QrCodeReceiptMessageDto receiptDto) {
         qrCodeService.readQrCode(receiptDto.getQrCodeImage())
@@ -58,6 +61,7 @@ public class ReceiptsServiceImpl implements ReceiptsService {
                 ex -> log.error("Bad QR: %s".formatted(ex.getMessage()), ex))
             .doOnError(IncorrectCategorizationResponseException.class,
                 ex -> log.error("Bad GigaChat response: %s".formatted(ex.getMessage()), ex))
+            .as(transactionalOperator::transactional)
             .subscribe();
         // всё категоризируется, дальше надо сохранить транзакцию
         // сформировать html страницу
@@ -65,7 +69,7 @@ public class ReceiptsServiceImpl implements ReceiptsService {
         // отправить неуспешно уведомление
     }
 
-    Mono<Receipt> throwIfExists(Receipt receipt) {
+    private Mono<Receipt> throwIfExists(Receipt receipt) {
         ReceiptQrData qrData = receipt.getReceiptQrData();
         return receiptsRepository.findByUserQrData(
                 receipt.getUserId(),
@@ -94,7 +98,7 @@ public class ReceiptsServiceImpl implements ReceiptsService {
             .switchIfEmpty(Mono.just(receipt));
     }
 
-    Mono<Receipt> save(Receipt receipt) {
+    private Mono<Receipt> save(Receipt receipt) {
         log.debug("New receipt successfully saved: userId:{}, receiptQrData:{}",
             receipt.getUserId(),
             receipt.getReceiptQrData());

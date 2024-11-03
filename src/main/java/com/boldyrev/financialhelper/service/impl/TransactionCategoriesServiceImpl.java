@@ -5,6 +5,7 @@ import com.boldyrev.financialhelper.repository.TransactionCategoriesRepository;
 import com.boldyrev.financialhelper.service.TransactionCategoriesService;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -19,7 +20,8 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class TransactionCategoriesServiceImpl implements TransactionCategoriesService {
 
-    private static final String DEFAULT_CATEGORY_NAME = "Прочее";
+    @Value("${app.default-category}")
+    private String defaultCategoryName;
 
     private final TransactionCategoriesRepository categoriesRepository;
 
@@ -39,6 +41,6 @@ public class TransactionCategoriesServiceImpl implements TransactionCategoriesSe
     @Override
     @Cacheable("defaultCategory")
     public Mono<TransactionCategory> getDefaultCategory() {
-        return categoriesRepository.findAllByCategoryName(DEFAULT_CATEGORY_NAME);
+        return categoriesRepository.findAllByCategoryName(defaultCategoryName);
     }
 }
