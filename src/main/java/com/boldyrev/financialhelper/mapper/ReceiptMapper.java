@@ -18,7 +18,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
 /**
- * //todo add description
+ * Mapper for {@link Receipt}.
  *
  * @author Alexandr Boldyrev
  */

@@ -5,7 +5,7 @@ import lombok.Data;
 import lombok.extern.jackson.Jacksonized;
 
 /**
- * //todo add description
+ * GigaChat dto message from generation API.
  *
  * @author Alexandr Boldyrev
  */

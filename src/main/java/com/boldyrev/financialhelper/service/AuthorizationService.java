@@ -3,7 +3,7 @@ package com.boldyrev.financialhelper.service;
 import reactor.core.publisher.Mono;
 
 /**
- * //todo add description
+ * Service for authorization in external API.
  *
  * @author Alexandr Boldyrev
  */

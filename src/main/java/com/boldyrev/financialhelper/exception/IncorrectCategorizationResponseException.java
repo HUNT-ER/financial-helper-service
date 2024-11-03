@@ -1,7 +1,7 @@
 package com.boldyrev.financialhelper.exception;
 
 /**
- * //todo add description
+ * Exception thrown when errors occur during categorization.
  *
  * @author Alexandr Boldyrev
  */

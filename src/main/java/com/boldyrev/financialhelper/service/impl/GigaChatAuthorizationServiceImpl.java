@@ -16,7 +16,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 /**
- * //todo add description
+ * Implementation of AuthorizationService.
  *
  * @author Alexandr Boldyrev
  */

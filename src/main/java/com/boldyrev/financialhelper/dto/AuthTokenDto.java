@@ -5,7 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * //todo add description
+ * Auth token for GigaChat.
  *
  * @author Alexandr Boldyrev
  */

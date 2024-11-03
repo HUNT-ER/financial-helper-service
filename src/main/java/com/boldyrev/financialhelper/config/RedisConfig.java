@@ -13,7 +13,7 @@ import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 /**
- * //todo add description
+ * Redis configuration.
  *
  * @author Alexandr Boldyrev
  */

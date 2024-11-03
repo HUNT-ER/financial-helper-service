@@ -7,7 +7,7 @@ import lombok.Data;
 import lombok.extern.jackson.Jacksonized;
 
 /**
- * //todo add description
+ * GigaChat request for categories generation.
  *
  * @author Alexandr Boldyrev
  */

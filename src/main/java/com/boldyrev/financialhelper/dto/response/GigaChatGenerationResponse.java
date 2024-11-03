@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * //todo add description
+ * GigaChat response from categories generation.
  *
  * @author Alexandr Boldyrev
  */
