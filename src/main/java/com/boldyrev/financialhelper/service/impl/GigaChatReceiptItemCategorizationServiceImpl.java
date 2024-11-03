@@ -1,13 +1,13 @@
 package com.boldyrev.financialhelper.service.impl;
 
 import com.boldyrev.financialhelper.config.GigaChatProperties;
+import com.boldyrev.financialhelper.dto.TransactionCategoryDto;
 import com.boldyrev.financialhelper.dto.request.ChatMessageDto;
 import com.boldyrev.financialhelper.dto.request.GigaChatGenerationRequest;
 import com.boldyrev.financialhelper.dto.response.GigaChatGenerationResponse;
 import com.boldyrev.financialhelper.dto.response.GigaChatGenerationResponse.GeneratedMessagesDto;
 import com.boldyrev.financialhelper.exception.IncorrectCategorizationResponseException;
 import com.boldyrev.financialhelper.model.ReceiptItem;
-import com.boldyrev.financialhelper.model.TransactionCategory;
 import com.boldyrev.financialhelper.service.AuthorizationService;
 import com.boldyrev.financialhelper.service.ReceiptItemsCategorizationService;
 import com.boldyrev.financialhelper.service.TransactionCategoriesService;
@@ -47,7 +47,7 @@ public class GigaChatReceiptItemCategorizationServiceImpl implements
 
 
     @Override
-    public Mono<Map<String, TransactionCategory>> categorizeItems(List<ReceiptItem> items) {
+    public Mono<Map<String, TransactionCategoryDto>> categorizeItems(List<ReceiptItem> items) {
         List<String> itemNames = items.stream()
             .map(ReceiptItem::getName)
             .toList();
@@ -64,10 +64,10 @@ public class GigaChatReceiptItemCategorizationServiceImpl implements
         log.debug("Starting categorization of items: size:{}, items:{}", itemNames.size(),
             templateItems);
 
-        HashMap<String, TransactionCategory> categories = new HashMap<>();
+        HashMap<String, TransactionCategoryDto> categories = new HashMap<>();
         return categoriesService.getCategories()
             .doOnNext(category -> categories.put(category.getCategoryName(), category))
-            .map(TransactionCategory::getCategoryName)
+            .map(TransactionCategoryDto::getCategoryName)
             .reduce(new StringJoiner(", "), StringJoiner::add)
             .flatMap(categoriesTemplate -> sendGenerationRequest(categoriesTemplate.toString(),
                 templateItems.toString()))
@@ -146,17 +146,17 @@ public class GigaChatReceiptItemCategorizationServiceImpl implements
      *
      * @param itemsMapping item name with its number, that sending to categorization.
      * @param categorizedItems item number with mapped category.
-     * @param categories map all {@link TransactionCategory} with its names {@link TransactionCategory#getCategoryName()}
-     * @return map with item raw name from receipt with mapped {@link TransactionCategory}.
+     * @param categories map all {@link TransactionCategoryDto} with its names {@link TransactionCategoryDto#getCategoryName()}
+     * @return map with item raw name from receipt with mapped {@link TransactionCategoryDto}.
      */
-    private Mono<Map<String, TransactionCategory>> mapItemsWithCategories(
+    private Mono<Map<String, TransactionCategoryDto>> mapItemsWithCategories(
         Map<Integer, String> itemsMapping, Map<Integer, String> categorizedItems, HashMap<String,
-        TransactionCategory> categories) {
+        TransactionCategoryDto> categories) {
         return categoriesService.getDefaultCategory()
             .flatMap(defaultCategory -> {
-                HashMap<String, TransactionCategory> result = new HashMap<>();
+                HashMap<String, TransactionCategoryDto> result = new HashMap<>();
                 itemsMapping.forEach((key, value) -> {
-                    TransactionCategory category = categories.getOrDefault(
+                    TransactionCategoryDto category = categories.getOrDefault(
                         categorizedItems.getOrDefault(key, "UNMAPPED"), defaultCategory);
                     result.put(value, category);
                 });

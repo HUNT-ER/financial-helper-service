@@ -5,7 +5,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.ReactiveMongoDatabaseFactory;
 import org.springframework.data.mongodb.ReactiveMongoTransactionManager;
 import org.springframework.data.mongodb.config.EnableReactiveMongoAuditing;
-import org.springframework.transaction.ReactiveTransactionManager;
 import org.springframework.transaction.reactive.TransactionalOperator;
 
 /**
@@ -18,14 +17,14 @@ import org.springframework.transaction.reactive.TransactionalOperator;
 public class MongoDbConfig {
 
     @Bean
-    public ReactiveMongoTransactionManager transactionManager(
+    public ReactiveMongoTransactionManager mongoTransactionManager(
         ReactiveMongoDatabaseFactory dbFactory) {
         return new ReactiveMongoTransactionManager(dbFactory);
     }
 
     @Bean
-    public TransactionalOperator transactionalOperator(
-        ReactiveTransactionManager transactionManager) {
+    public TransactionalOperator mongoTransactionalOperator(
+        ReactiveMongoTransactionManager transactionManager) {
         return TransactionalOperator.create(transactionManager);
     }
 }

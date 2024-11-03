@@ -1,6 +1,7 @@
 package com.boldyrev.financialhelper.service;
 
 import com.boldyrev.financialhelper.dto.QrCodeReceiptMessageDto;
+import reactor.core.publisher.Mono;
 
 /**
  * Service with business logic to process QR-code receipts.
@@ -13,6 +14,7 @@ public interface ReceiptsService {
      * Process QR-code receipt.
      *
      * @param receiptDto message with QR-code receipt.
+     * @return void
      */
-    void processQrCodeReceipt(QrCodeReceiptMessageDto receiptDto);
+    Mono<Void> processQrCodeReceipt(QrCodeReceiptMessageDto receiptDto);
 }

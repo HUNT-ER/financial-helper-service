@@ -2,24 +2,34 @@ package com.boldyrev.financialhelper.service.impl;
 
 import com.boldyrev.financialhelper.config.QrCodeReceiptApiProperties;
 import com.boldyrev.financialhelper.dto.QrCodeReceiptMessageDto;
+import com.boldyrev.financialhelper.dto.TransactionCategoryDto;
+import com.boldyrev.financialhelper.dto.TransactionDto;
 import com.boldyrev.financialhelper.dto.request.ReceiptQrRequestDto;
 import com.boldyrev.financialhelper.dto.response.ReceiptQrResponseDto;
+import com.boldyrev.financialhelper.enums.TransactionType;
 import com.boldyrev.financialhelper.exception.IncorrectCategorizationResponseException;
 import com.boldyrev.financialhelper.exception.QrCodeReadingException;
 import com.boldyrev.financialhelper.exception.ReceiptAlreadyExistsException;
 import com.boldyrev.financialhelper.mapper.ReceiptMapper;
 import com.boldyrev.financialhelper.model.Receipt;
+import com.boldyrev.financialhelper.model.ReceiptItem;
 import com.boldyrev.financialhelper.model.ReceiptQrData;
 import com.boldyrev.financialhelper.repository.ReceiptsRepository;
 import com.boldyrev.financialhelper.service.QrCodeService;
 import com.boldyrev.financialhelper.service.ReceiptItemsCategorizationService;
 import com.boldyrev.financialhelper.service.ReceiptsService;
+import com.boldyrev.financialhelper.service.TransactionsService;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.reactive.TransactionalOperator;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuples;
 
 /**
  * Implementation of {@link ReceiptsService}.
@@ -43,27 +53,33 @@ public class ReceiptsServiceImpl implements ReceiptsService {
 
     private final ReceiptItemsCategorizationService categorizationService;
 
-    private final TransactionalOperator transactionalOperator;
+    private final TransactionsService transactionsService;
+
+    private final TransactionalOperator mongoTransactionalOperator;
+
+    private final TransactionalOperator r2dbcTransactionalOperator;
 
     @Override
-    public void processQrCodeReceipt(QrCodeReceiptMessageDto receiptDto) {
-        qrCodeService.readQrCode(receiptDto.getQrCodeImage())
+    public Mono<Void> processQrCodeReceipt(QrCodeReceiptMessageDto receiptDto) {
+       return qrCodeService.readQrCode(receiptDto.getQrCodeImage())
             .flatMap(this::sendQrReceiptOnDecode)
             .map(receiptMapper::mapFromReceiptQrResponse)
             .doOnNext(receipt -> receipt.setUserId(receiptDto.getUserId()))
             .flatMap(this::throwIfExists)
             .flatMap(this::save)
-            .flatMap(receipt -> categorizationService.categorizeItems(
-                receipt.getReceiptData().getItems()))
+            .flatMap(receipt ->
+                categorizationService.categorizeItems(receipt.getReceiptData().getItems())
+                    .flatMap(categorizedItems -> Mono.just(Tuples.of(receipt, categorizedItems))))
+            .flatMap(tuple -> saveTransactions(tuple.getT1(), tuple.getT2()))
             .doOnError(ReceiptAlreadyExistsException.class,
                 ex -> log.error("Existed receipt: %s".formatted(ex.getMessage()), ex))
             .doOnError(QrCodeReadingException.class,
                 ex -> log.error("Bad QR: %s".formatted(ex.getMessage()), ex))
             .doOnError(IncorrectCategorizationResponseException.class,
                 ex -> log.error("Bad GigaChat response: %s".formatted(ex.getMessage()), ex))
-            .as(transactionalOperator::transactional)
-            .subscribe();
-        // всё категоризируется, дальше надо сохранить транзакцию
+            .as(mongoTransactionalOperator::transactional)
+            .as(r2dbcTransactionalOperator::transactional)
+            .then();
         // сформировать html страницу
         // отправить уведомление
         // отправить неуспешно уведомление
@@ -114,5 +130,31 @@ public class ReceiptsServiceImpl implements ReceiptsService {
             .bodyValue(new ReceiptQrRequestDto(qrCode, receiptApiProperties.getReadingApiToken()))
             .retrieve()
             .bodyToMono(ReceiptQrResponseDto.class);
+    }
+
+    private Mono<Receipt> saveTransactions(Receipt receipt,
+        Map<String, TransactionCategoryDto> categorizedItems) {
+        TransactionType transactionType = receipt.getReceiptData().getOperationType()
+            .getTransactionType();
+
+        List<TransactionDto> mappedTransactions = new ArrayList<>();
+
+        receipt.getReceiptData()
+            .getItems()
+            .stream()
+            .collect(Collectors.groupingBy(item -> categorizedItems.get(item.getName()).getId(),
+                Collectors.summarizingDouble(ReceiptItem::getSum))).forEach(
+                (categoryId, amount) -> mappedTransactions.add(
+                    TransactionDto.builder()
+                        .categoryId(categoryId)
+                        .amount(amount.getSum())
+                        .userId(receipt.getUserId())
+                        .transactionType(transactionType)
+                        .transactionDateTime(receipt.getReceiptData().getDateTime())
+                        .build()
+                )
+            );
+
+        return transactionsService.saveTransactions(mappedTransactions).thenReturn(receipt);
     }
 }

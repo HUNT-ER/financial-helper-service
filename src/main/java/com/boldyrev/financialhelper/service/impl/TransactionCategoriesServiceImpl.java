@@ -1,6 +1,7 @@
 package com.boldyrev.financialhelper.service.impl;
 
-import com.boldyrev.financialhelper.model.TransactionCategory;
+import com.boldyrev.financialhelper.dto.TransactionCategoryDto;
+import com.boldyrev.financialhelper.mapper.TransactionCategoryMapper;
 import com.boldyrev.financialhelper.repository.TransactionCategoriesRepository;
 import com.boldyrev.financialhelper.service.TransactionCategoriesService;
 import java.util.Map;
@@ -12,7 +13,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
- * //todo add description
+ * Implementation of {@link TransactionCategoriesService}.
  *
  * @author Alexandr Boldyrev
  */
@@ -25,22 +26,27 @@ public class TransactionCategoriesServiceImpl implements TransactionCategoriesSe
 
     private final TransactionCategoriesRepository categoriesRepository;
 
+    private final TransactionCategoryMapper mapper;
+
     @Override
     @Cacheable("categories")
-    public Flux<TransactionCategory> getCategories() {
-        return categoriesRepository.findAll();
+    public Flux<TransactionCategoryDto> getCategories() {
+        return categoriesRepository.findAll()
+            .map(mapper::toDto);
     }
 
     @Override
     @Cacheable("categoriesMap")
-    public Mono<Map<String, TransactionCategory>> getCategoriesMap() {
+    public Mono<Map<String, TransactionCategoryDto>> getCategoriesMap() {
         return categoriesRepository.findAll()
-            .collectMap(TransactionCategory::getCategoryName);
+            .map(mapper::toDto)
+            .collectMap(TransactionCategoryDto::getCategoryName);
     }
 
     @Override
     @Cacheable("defaultCategory")
-    public Mono<TransactionCategory> getDefaultCategory() {
-        return categoriesRepository.findAllByCategoryName(defaultCategoryName);
+    public Mono<TransactionCategoryDto> getDefaultCategory() {
+        return categoriesRepository.findAllByCategoryName(defaultCategoryName)
+            .map(mapper::toDto);
     }
 }

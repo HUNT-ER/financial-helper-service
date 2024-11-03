@@ -1,6 +1,5 @@
 package com.boldyrev.financialhelper.model;
 
-import java.io.Serializable;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.Data;
@@ -17,9 +16,7 @@ import org.springframework.data.relational.core.mapping.Table;
  */
 @Data
 @Table("transaction_categories")
-public class TransactionCategory implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class TransactionCategory {
 
     @Id
     @Column("category_id")

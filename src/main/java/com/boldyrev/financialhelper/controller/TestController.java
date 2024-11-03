@@ -44,8 +44,7 @@ public class TestController implements QuotesApi {
             e.printStackTrace();
         }
 
-        receiptsService.processQrCodeReceipt(qrCodeReceiptMessageDto);
-
-        return null;
+        return receiptsService.processQrCodeReceipt(qrCodeReceiptMessageDto)
+            .thenReturn(ResponseEntity.ok(null));
     }
 }
