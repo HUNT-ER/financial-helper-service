@@ -1,12 +1,15 @@
 package com.boldyrev.financialhelper.service.impl;
 
 import com.boldyrev.financialhelper.config.QrCodeReceiptApiProperties;
+import com.boldyrev.financialhelper.dto.MessageDto;
 import com.boldyrev.financialhelper.dto.QrCodeReceiptMessageDto;
 import com.boldyrev.financialhelper.dto.TransactionCategoryDto;
 import com.boldyrev.financialhelper.dto.TransactionDto;
 import com.boldyrev.financialhelper.dto.request.ReceiptQrRequestDto;
 import com.boldyrev.financialhelper.dto.response.ReceiptQrResponseDto;
+import com.boldyrev.financialhelper.enums.RoutingKey;
 import com.boldyrev.financialhelper.enums.TransactionType;
+import com.boldyrev.financialhelper.enums.UserMessage;
 import com.boldyrev.financialhelper.exception.IncorrectCategorizationResponseException;
 import com.boldyrev.financialhelper.exception.QrCodeReadingException;
 import com.boldyrev.financialhelper.exception.ReceiptAlreadyExistsException;
@@ -16,6 +19,7 @@ import com.boldyrev.financialhelper.model.ReceiptItem;
 import com.boldyrev.financialhelper.model.ReceiptQrData;
 import com.boldyrev.financialhelper.repository.ReceiptsRepository;
 import com.boldyrev.financialhelper.service.QrCodeService;
+import com.boldyrev.financialhelper.service.RabbitMqMessageService;
 import com.boldyrev.financialhelper.service.ReceiptItemsCategorizationService;
 import com.boldyrev.financialhelper.service.ReceiptsService;
 import com.boldyrev.financialhelper.service.TransactionsService;
@@ -53,6 +57,8 @@ public class ReceiptsServiceImpl implements ReceiptsService {
 
     private final ReceiptItemsCategorizationService categorizationService;
 
+    private final RabbitMqMessageService messageService;
+
     private final TransactionsService transactionsService;
 
     private final TransactionalOperator mongoTransactionalOperator;
@@ -61,7 +67,7 @@ public class ReceiptsServiceImpl implements ReceiptsService {
 
     @Override
     public Mono<Void> processQrCodeReceipt(QrCodeReceiptMessageDto receiptDto) {
-       return qrCodeService.readQrCode(receiptDto.getQrCodeImage())
+        return qrCodeService.readQrCode(receiptDto.getQrCodeImage())
             .flatMap(this::sendQrReceiptOnDecode)
             .map(receiptMapper::mapFromReceiptQrResponse)
             .doOnNext(receipt -> receipt.setUserId(receiptDto.getUserId()))
@@ -71,12 +77,7 @@ public class ReceiptsServiceImpl implements ReceiptsService {
                 categorizationService.categorizeItems(receipt.getReceiptData().getItems())
                     .flatMap(categorizedItems -> Mono.just(Tuples.of(receipt, categorizedItems))))
             .flatMap(tuple -> saveTransactions(tuple.getT1(), tuple.getT2()))
-            .doOnError(ReceiptAlreadyExistsException.class,
-                ex -> log.error("Existed receipt: %s".formatted(ex.getMessage()), ex))
-            .doOnError(QrCodeReadingException.class,
-                ex -> log.error("Bad QR: %s".formatted(ex.getMessage()), ex))
-            .doOnError(IncorrectCategorizationResponseException.class,
-                ex -> log.error("Bad GigaChat response: %s".formatted(ex.getMessage()), ex))
+            .doOnError(ex -> processException(ex, receiptDto.getUserId()))
             .as(mongoTransactionalOperator::transactional)
             .as(r2dbcTransactionalOperator::transactional)
             .then();
@@ -156,5 +157,23 @@ public class ReceiptsServiceImpl implements ReceiptsService {
             );
 
         return transactionsService.saveTransactions(mappedTransactions).thenReturn(receipt);
+    }
+
+    private void processException(Throwable ex, Long userId) {
+        log.debug(ex.getMessage());
+        MessageDto messageDto = new MessageDto(userId, null);
+        switch (ex) {
+            case ReceiptAlreadyExistsException e ->
+                messageDto.setMessage(UserMessage.RECEIPT_ALREADY_EXISTS);
+            case QrCodeReadingException e ->
+                messageDto.setMessage(UserMessage.INCORRECT_QR_CODE);
+            case IncorrectCategorizationResponseException e ->
+                messageDto.setMessage(UserMessage.CATEGORIZATION_ERROR);
+            default -> {
+                return;
+            }
+        }
+        messageService.sendMessage(RoutingKey.ERROR,
+            new MessageDto(userId, UserMessage.INCORRECT_QR_CODE));
     }
 }

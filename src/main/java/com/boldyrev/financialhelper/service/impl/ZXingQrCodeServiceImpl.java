@@ -41,7 +41,8 @@ public class ZXingQrCodeServiceImpl implements QrCodeService {
                     return result.getText();
                 }
             })
-            .onErrorMap(ex -> new QrCodeReadingException(ex.getMessage(), ex))
+            .onErrorMap(ex -> new QrCodeReadingException(
+                "Error occurred while reading QR-code:%s".formatted(ex.getMessage()), ex))
             .subscribeOn(Schedulers.boundedElastic());
     }
 }

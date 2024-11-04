@@ -66,8 +66,9 @@ app:
     reading-api-url: ${QR_CODE_READING_RECEIPT_API}
     reading-api-token: ${QR_CODE_READING_RECEIPT_API_TOKEN}
   rabbitmq:
-    queue: fm-common
-    exchange: fm-exchange
+    queue:
+      error: fh-error
+    exchange: fh-exchange
   dev-profile: ${IS_DEV_PROFILE:false}
   gigachat:
     generation-model: ${GIGACHAT_GENERATION_MODEL}
