@@ -7,6 +7,7 @@ import com.boldyrev.financialhelper.dto.TransactionCategoryDto;
 import com.boldyrev.financialhelper.dto.TransactionDto;
 import com.boldyrev.financialhelper.dto.request.ReceiptQrRequestDto;
 import com.boldyrev.financialhelper.dto.response.ReceiptQrResponseDto;
+import com.boldyrev.financialhelper.enums.MessageType;
 import com.boldyrev.financialhelper.enums.RoutingKey;
 import com.boldyrev.financialhelper.enums.TransactionType;
 import com.boldyrev.financialhelper.enums.UserMessage;
@@ -161,7 +162,7 @@ public class ReceiptsServiceImpl implements ReceiptsService {
 
     private void processException(Throwable ex, Long userId) {
         log.debug(ex.getMessage());
-        MessageDto messageDto = new MessageDto(userId, null);
+        MessageDto messageDto = new MessageDto(userId, null, MessageType.ERROR);
         switch (ex) {
             case ReceiptAlreadyExistsException e ->
                 messageDto.setMessage(UserMessage.RECEIPT_ALREADY_EXISTS);
@@ -173,7 +174,6 @@ public class ReceiptsServiceImpl implements ReceiptsService {
                 return;
             }
         }
-        messageService.sendMessage(RoutingKey.ERROR,
-            new MessageDto(userId, UserMessage.INCORRECT_QR_CODE));
+        messageService.sendMessage(RoutingKey.ERROR, messageDto);
     }
 }

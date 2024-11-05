@@ -1,5 +1,6 @@
 package com.boldyrev.financialhelper.dto;
 
+import com.boldyrev.financialhelper.enums.MessageType;
 import com.boldyrev.financialhelper.enums.UserMessage;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,4 +21,6 @@ public class MessageDto {
     Long userId;
 
     UserMessage message;
+
+    MessageType messageType;
 }
