@@ -6,7 +6,9 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
+import org.springframework.security.config.web.server.ServerHttpSecurity.CsrfSpec;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 
 /**
@@ -15,6 +17,7 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
  * @author Alexandr Boldyrev
  */
 @Configuration
+@EnableWebFluxSecurity
 public class SpringSecurityConfig {
 
     private static final String[] SWAGGER_URL = {
@@ -27,7 +30,7 @@ public class SpringSecurityConfig {
     @ConditionalOnProperty(value = "app.dev-profile", havingValue = "true")
     public SecurityWebFilterChain securityFilterChainLocal(ServerHttpSecurity httpSecurity) {
         return httpSecurity.cors(withDefaults())
-            .csrf(withDefaults())
+            .csrf(CsrfSpec::disable)
             .cors(withDefaults())
             .oauth2ResourceServer(oauth -> oauth.jwt(withDefaults()))
             .authorizeExchange(r -> r.anyExchange().permitAll())
@@ -38,7 +41,7 @@ public class SpringSecurityConfig {
     @ConditionalOnExpression("!'true'.equalsIgnoreCase('${app.dev-profile}')")
     public SecurityWebFilterChain securityFilterChain(ServerHttpSecurity httpSecurity) {
         return httpSecurity.cors(withDefaults())
-            .csrf(withDefaults())
+            .csrf(CsrfSpec::disable)
             .cors(withDefaults())
             .oauth2ResourceServer(oauth -> oauth.jwt(withDefaults()))
             .authorizeExchange(
