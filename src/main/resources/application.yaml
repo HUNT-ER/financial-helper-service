@@ -68,6 +68,7 @@ app:
   rabbitmq:
     queue:
       error: fh-error
+      html-receipt: fh-html-receipt
     exchange: fh-exchange
   dev-profile: ${IS_DEV_PROFILE:false}
   gigachat:

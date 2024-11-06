@@ -6,5 +6,6 @@ package com.boldyrev.financialhelper.enums;
  * @author Alexandr Boldyrev
  */
 public enum RoutingKey {
-    ERROR
+    ERROR,
+    HTML_RECEIPT
 }

@@ -1,5 +1,6 @@
 package com.boldyrev.financialhelper.mapper;
 
+import com.boldyrev.financialhelper.dto.HtmlReceiptAttributes;
 import com.boldyrev.financialhelper.dto.response.ReceiptQrResponseDto;
 import com.boldyrev.financialhelper.dto.response.ReceiptQrResponseDto.ReceiptDataDto.ReceiptJsonDataDto;
 import com.boldyrev.financialhelper.dto.response.ReceiptQrResponseDto.ReceiptDataDto.ReceiptJsonDataDto.MetadataDto;
@@ -60,6 +61,19 @@ public interface ReceiptMapper {
 
     @Mapping(target = "receiveDate", expression = "java(Instant.parse(metadataDto.getReceiveDate()))")
     ReceiptMetadata mapFromMetadataDto(MetadataDto metadataDto);
+
+    @Mapping(target = "organization", source = "receipt.receiptData.user")
+    @Mapping(target = "organizationAddress", source = "receipt.receiptData.retailPlaceAddress")
+    @Mapping(target = "organizationInn", source = "receipt.receiptData.userInn")
+    @Mapping(target = "receiptDate", source = "receipt.receiptData.dateTime")
+    @Mapping(target = "items", source = "receipt.receiptData.items")
+    @Mapping(target = "totalSum", source = "receipt.receiptData.totalSum")
+    @Mapping(target = "cashTotalSum", source = "receipt.receiptData.cashTotalSum")
+    @Mapping(target = "ecashTotalSum", source = "receipt.receiptData.ecashTotalSum")
+    @Mapping(target = "fn", source = "receipt.receiptQrData.fn")
+    @Mapping(target = "fd", source = "receipt.receiptQrData.fd")
+    @Mapping(target = "fp", source = "receipt.receiptQrData.fp")
+    HtmlReceiptAttributes mapToHtmlReceiptAttributes(Receipt receipt);
 
     @Named("intToDouble")
     default double intToDouble(int value) {

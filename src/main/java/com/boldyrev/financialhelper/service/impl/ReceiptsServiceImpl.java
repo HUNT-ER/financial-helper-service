@@ -19,6 +19,7 @@ import com.boldyrev.financialhelper.model.Receipt;
 import com.boldyrev.financialhelper.model.ReceiptItem;
 import com.boldyrev.financialhelper.model.ReceiptQrData;
 import com.boldyrev.financialhelper.repository.ReceiptsRepository;
+import com.boldyrev.financialhelper.service.HtmlTemplatesService;
 import com.boldyrev.financialhelper.service.QrCodeService;
 import com.boldyrev.financialhelper.service.RabbitMqMessageService;
 import com.boldyrev.financialhelper.service.ReceiptItemsCategorizationService;
@@ -34,6 +35,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.reactive.TransactionalOperator;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 import reactor.util.function.Tuples;
 
 /**
@@ -66,6 +68,8 @@ public class ReceiptsServiceImpl implements ReceiptsService {
 
     private final TransactionalOperator r2dbcTransactionalOperator;
 
+    private final HtmlTemplatesService templatesService;
+
     @Override
     public Mono<Void> processQrCodeReceipt(QrCodeReceiptMessageDto receiptDto) {
         return qrCodeService.readQrCode(receiptDto.getQrCodeImage())
@@ -78,13 +82,13 @@ public class ReceiptsServiceImpl implements ReceiptsService {
                 categorizationService.categorizeItems(receipt.getReceiptData().getItems())
                     .flatMap(categorizedItems -> Mono.just(Tuples.of(receipt, categorizedItems))))
             .flatMap(tuple -> saveTransactions(tuple.getT1(), tuple.getT2()))
+            .flatMap(receipt -> templatesService.formHtmlReceipt(
+                receiptMapper.mapToHtmlReceiptAttributes(receipt)))
+            .flatMap(htmlReceipt -> sendHtmlReceipt(receiptDto.getUserId(), htmlReceipt))
             .doOnError(ex -> processException(ex, receiptDto.getUserId()))
             .as(mongoTransactionalOperator::transactional)
             .as(r2dbcTransactionalOperator::transactional)
             .then();
-        // сформировать html страницу
-        // отправить уведомление
-        // отправить неуспешно уведомление
     }
 
     private Mono<Receipt> throwIfExists(Receipt receipt) {
@@ -162,7 +166,7 @@ public class ReceiptsServiceImpl implements ReceiptsService {
 
     private void processException(Throwable ex, Long userId) {
         log.debug(ex.getMessage());
-        MessageDto messageDto = new MessageDto(userId, null, MessageType.ERROR);
+        MessageDto messageDto = new MessageDto(userId, null, MessageType.ERROR, null);
         switch (ex) {
             case ReceiptAlreadyExistsException e ->
                 messageDto.setMessage(UserMessage.RECEIPT_ALREADY_EXISTS);
@@ -175,5 +179,13 @@ public class ReceiptsServiceImpl implements ReceiptsService {
             }
         }
         messageService.sendMessage(RoutingKey.ERROR, messageDto);
+    }
+
+    private Mono<Void> sendHtmlReceipt(Long userId, String htmlReceipt) {
+        return Mono.fromRunnable(() -> {
+            MessageDto message = new MessageDto(userId, UserMessage.SUCCESS_QR_CODE_READING,
+                MessageType.HTML_RECEIPT, htmlReceipt);
+            messageService.sendMessage(RoutingKey.HTML_RECEIPT, message);
+        }).subscribeOn(Schedulers.boundedElastic()).then();
     }
 }

@@ -27,6 +27,9 @@ public class RabbitMqConfig {
     @Value("${app.rabbitmq.queue.error}")
     private String errorQueue;
 
+    @Value("${app.rabbitmq.queue.html-receipt}")
+    private String htmlReceiptQueue;
+
     @Bean
     public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory, ObjectMapper mapper) {
         RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
@@ -46,9 +49,21 @@ public class RabbitMqConfig {
     }
 
     @Bean
-    public Binding commonBinding() {
+    public Binding errorQueueBinding() {
         return BindingBuilder.bind(errorQueue())
             .to(directExchange())
             .with(RoutingKey.ERROR);
+    }
+
+    @Bean
+    public Queue htmlReceiptQueue() {
+        return new Queue(htmlReceiptQueue);
+    }
+
+    @Bean
+    public Binding htmlReceiptQueueBinding() {
+        return BindingBuilder.bind(htmlReceiptQueue())
+            .to(directExchange())
+            .with(RoutingKey.HTML_RECEIPT);
     }
 }

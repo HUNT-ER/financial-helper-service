@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8">
+    <title>Чек</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+      }
+      .organization-info, .total-section, .tax-info {
+        margin-bottom: 15px;
+      }
+      .organization-info {
+        font-weight: bold;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 15px;
+      }
+      th, td {
+        border: 1px solid black;
+        padding: 8px;
+        text-align: left;
+      }
+      .footer {
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="organization-info">
+      <p th:text="${receiptAttributes.organization}"></p>
+      <p th:text="${receiptAttributes.organizationAddress}"></p>
+      <p>ИНН <span th:text="${receiptAttributes.organizationInn}"></span></p>
+    </div>
+
+    <div class="receipt-date">
+      <p th:text="${receiptAttributes.receiptDate}"></p>
+    </div>
+
+    <table>
+      <thead>
+      <tr>
+        <th>№</th>
+        <th>Название</th>
+        <th>Цена</th>
+        <th>Кол.</th>
+        <th>Сумма</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="item, iterStat : ${receiptAttributes.items}">
+        <td th:text="${iterStat.count}"></td>
+        <td th:text="${item.name}"></td>
+        <td th:text="${item.price}"></td>
+        <td th:text="${item.quantity}"></td>
+        <td th:text="${item.sum}"></td>
+      </tr>
+      </tbody>
+    </table>
+
+    <div class="total-section">
+      <p>ИТОГО: <span th:text="${receiptAttributes.totalSum}"></span></p>
+      <p>Наличные: <span th:text="${receiptAttributes.cashTotalSum}"></span></p>
+      <p>Карта: <span th:text="${receiptAttributes.ecashTotalSum}"></span></p>
+    </div>
+
+    <div class="footer">
+      <p>ФН: <span th:text="${receiptAttributes.fn}"></span></p>
+      <p>ФД: <span th:text="${receiptAttributes.fd}"></span></p>
+      <p>ФПД: <span th:text="${receiptAttributes.fp}"></span></p>
+    </div>
+  </body>
+</html>
