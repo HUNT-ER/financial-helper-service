@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
- * //todo add description
+ * Properties for reading qr-code receipt API.
  *
  * @author Alexandr Boldyrev
  */

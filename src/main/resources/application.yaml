@@ -28,6 +28,13 @@ spring:
       repositories:
         enabled: true
 
+    redis:
+      database: 0
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:pass}
+      connect-timeout: 60000
+
     mongodb:
       host: ${MONGODB_HOST:localhost}
       port: ${MONGODB_PORT:27017}
@@ -59,6 +66,16 @@ app:
     reading-api-url: ${QR_CODE_READING_RECEIPT_API}
     reading-api-token: ${QR_CODE_READING_RECEIPT_API_TOKEN}
   rabbitmq:
-    queue: fm-common
-    exchange: fm-exchange
+    queue:
+      error: fh-error
+      html-receipt: fh-html-receipt
+    exchange: fh-exchange
   dev-profile: ${IS_DEV_PROFILE:false}
+  gigachat:
+    generation-model: ${GIGACHAT_GENERATION_MODEL}
+    generation-api-url: ${GIGACHAT_GENERATION_API_URL}
+    auth-url: ${GIGACHAT_AUTH_URL}
+    auth-token: ${GIGACHAT_AUTH_TOKEN}
+    generation-categories-prompt: ${GIGACHAT_GENERATION_PROMPT}
+    api-scope: GIGACHAT_API_PERS
+  default-category: ${DEFAULT_CATEGORY:Other}

@@ -46,7 +46,7 @@ databaseChangeLog:
                   constraints:
                     primaryKey: true
                     nullable: false
-                    defaultValueComputed: gen_random_uuid()
+                  defaultValueComputed: gen_random_uuid()
               - column:
                   name: category_id
                   type: uuid
@@ -67,6 +67,11 @@ databaseChangeLog:
               - column:
                   name: amount
                   type: decimal(10, 2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: transaction_date_time
+                  type: timestamp
                   constraints:
                     nullable: false
               - column:
@@ -93,7 +98,7 @@ databaseChangeLog:
                   constraints:
                     primaryKey: true
                     nullable: false
-                    defaultValueComputed: gen_random_uuid()
+                  defaultValueComputed: gen_random_uuid()
               - column:
                   name: category_id
                   type: uuid

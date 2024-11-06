@@ -35,6 +35,9 @@ public class Transaction {
     @Column("amount")
     private Double amount;
 
+    @Column("transaction_date_time")
+    private Instant transactionDateTime;
+
     @CreatedDate
     @Column("created_at")
     private Instant createdAt;
