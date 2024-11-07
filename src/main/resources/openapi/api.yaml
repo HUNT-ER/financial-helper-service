@@ -7,6 +7,8 @@ info:
 tags:
   - name: 'Transactions'
     description: 'Transactions API'
+  - name: 'SpendingLimits'
+    description: 'Spending Limits API'
 
 paths:
   /api/v1/transactions:
@@ -24,6 +26,23 @@ paths:
       responses:
         '201':
           description: 'Successfully created'
+
+  /api/v1/spending-limits:
+    put:
+      tags:
+        - SpendingLimits
+      summary: 'Add new spending limit'
+      operationId: addSpendingLimit
+      requestBody:
+        description: 'New spending limit'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SpendingLimitCreationDto'
+      responses:
+        '201':
+          description: 'Successfully created'
+
 
   /quotes/{symbol}:
     get:
@@ -75,7 +94,7 @@ components:
         categoryId:
           type: string
           format: uuid
-          description: Telegram user id
+          description: Category id
         userId:
           type: integer
           format: int64
@@ -91,3 +110,36 @@ components:
         transactionDateTime:
           type: string
           format: date-time
+
+    SpendingLimitCreationDto:
+      type: object
+      required:
+        - categoryId
+        - userId
+        - spendingLimit
+        - startPeriod
+        - endPeriod
+      properties:
+        categoryId:
+          type: string
+          format: uuid
+          description: Category id
+        userId:
+          type: integer
+          format: int64
+          description: Telegram user id
+          minimum: 1
+        spendingLimit:
+          type: number
+          format: double
+          minimum: 0.1
+          description: Spending limit
+        startPeriod:
+          type: string
+          format: date-time
+          description: Start date of the period
+        endPeriod:
+          type: string
+          format: date-time
+          description: End date of the period
+          nullable: true

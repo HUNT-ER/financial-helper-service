@@ -30,6 +30,9 @@ public class RabbitMqConfig {
     @Value("${app.rabbitmq.queue.html-receipt}")
     private String htmlReceiptQueue;
 
+    @Value("${app.rabbitmq.queue.notification}")
+    private String notificationQueue;
+
     @Bean
     public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory, ObjectMapper mapper) {
         RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
@@ -39,7 +42,7 @@ public class RabbitMqConfig {
     }
 
     @Bean
-    public DirectExchange directExchange(){
+    public DirectExchange directExchange() {
         return new DirectExchange(exchange);
     }
 
@@ -65,5 +68,17 @@ public class RabbitMqConfig {
         return BindingBuilder.bind(htmlReceiptQueue())
             .to(directExchange())
             .with(RoutingKey.HTML_RECEIPT);
+    }
+
+    @Bean
+    public Queue notificationQueue() {
+        return new Queue(notificationQueue);
+    }
+
+    @Bean
+    public Binding notificationQueueBinding() {
+        return BindingBuilder.bind(notificationQueue())
+            .to(directExchange())
+            .with(RoutingKey.NOTIFICATION);
     }
 }

@@ -23,13 +23,19 @@ public class SpendingLimit {
     private UUID id;
 
     @Column("category_id")
-    private Long categoryId;
+    private UUID categoryId;
 
     @Column("user_id")
     private Long userId;
 
-    @Column("limit")
-    private Double limit;
+    @Column("spending_limit")
+    private Double spendingLimit;
+
+    @Column("start_period")
+    private Instant startPeriod;
+
+    @Column("end_period")
+    private Instant endPeriod;
 
     @CreatedDate
     @Column("created_at")

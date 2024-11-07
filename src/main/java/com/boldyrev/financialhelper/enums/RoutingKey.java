@@ -7,5 +7,6 @@ package com.boldyrev.financialhelper.enums;
  */
 public enum RoutingKey {
     ERROR,
-    HTML_RECEIPT
+    HTML_RECEIPT,
+    NOTIFICATION
 }

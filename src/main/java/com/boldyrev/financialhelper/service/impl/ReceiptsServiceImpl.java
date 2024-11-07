@@ -169,11 +169,11 @@ public class ReceiptsServiceImpl implements ReceiptsService {
         MessageDto messageDto = new MessageDto(userId, null, MessageType.ERROR, null);
         switch (ex) {
             case ReceiptAlreadyExistsException e ->
-                messageDto.setMessage(UserMessage.RECEIPT_ALREADY_EXISTS);
+                messageDto.setMessage(UserMessage.RECEIPT_ALREADY_EXISTS.getMessage());
             case QrCodeReadingException e ->
-                messageDto.setMessage(UserMessage.INCORRECT_QR_CODE);
+                messageDto.setMessage(UserMessage.INCORRECT_QR_CODE.getMessage());
             case IncorrectCategorizationResponseException e ->
-                messageDto.setMessage(UserMessage.CATEGORIZATION_ERROR);
+                messageDto.setMessage(UserMessage.CATEGORIZATION_ERROR.getMessage());
             default -> {
                 return;
             }
@@ -183,7 +183,8 @@ public class ReceiptsServiceImpl implements ReceiptsService {
 
     private Mono<Void> sendHtmlReceipt(Long userId, String htmlReceipt) {
         return Mono.fromRunnable(() -> {
-            MessageDto message = new MessageDto(userId, UserMessage.SUCCESS_QR_CODE_READING,
+            MessageDto message = new MessageDto(userId,
+                UserMessage.SUCCESS_QR_CODE_READING.getMessage(),
                 MessageType.HTML_RECEIPT, htmlReceipt);
             messageService.sendMessage(RoutingKey.HTML_RECEIPT, message);
         }).subscribeOn(Schedulers.boundedElastic()).then();
