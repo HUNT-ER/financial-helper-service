@@ -71,8 +71,9 @@ openApiGenerate {
     modelPackage = "com.boldyrev.dto"
     library = "spring-boot"
     configOptions = [
+            useBeanValidation: "true",
             reactive: "true",
-            additionalModelTypeAnnotations: "@lombok.experimental.SuperBuilder;@lombok.NoArgsConstructor;@lombok.AllArgsConstructor",
+            additionalModelTypeAnnotations: "@lombok.Builder",
             interfaceOnly: "true",
             useTags: "true",
             dateLibrary: "java8",

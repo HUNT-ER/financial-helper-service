@@ -1,14 +1,30 @@
 openapi: 3.0.0
 
 info:
-  title: Quotes API
+  title: 'Finance Helper API'
   version: 1.0.0
 
-servers:
-  - description: Test server
-    url: http://localhost:8080
+tags:
+  - name: 'Transactions'
+    description: 'Transactions API'
 
 paths:
+  /api/v1/transactions:
+    post:
+      tags:
+        - Transactions
+      summary: 'Create new transaction'
+      operationId: addTransaction
+      requestBody:
+        description: 'New transaction'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionCreationDto'
+      responses:
+        '201':
+          description: 'Successfully created'
+
   /quotes/{symbol}:
     get:
       tags:
@@ -43,5 +59,35 @@ components:
           type: number
           description: Quote value
         timestamp:
+          type: string
+          format: date-time
+
+    TransactionCreationDto:
+      type: object
+      required:
+        - categoryId
+        - userId
+        - transactionType
+        - amount
+        - transactionDateTime
+      description: "Результат восстановления из архива"
+      properties:
+        categoryId:
+          type: string
+          format: uuid
+          description: Telegram user id
+        userId:
+          type: integer
+          format: int64
+          description: Telegram user id
+          minimum: 1
+        transactionType:
+          type: string
+          enum: [ INCOME, EXPENSE, TRANSFER ]
+        amount:
+          type: number
+          format: double
+          minimum: 1
+        transactionDateTime:
           type: string
           format: date-time
