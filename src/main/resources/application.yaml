@@ -70,6 +70,7 @@ app:
       error: fh-error
       html-receipt: fh-html-receipt
       notification: fh-notification
+      qr-receipt: fh-qr-receipt
     exchange: fh-exchange
   dev-profile: ${IS_DEV_PROFILE:false}
   gigachat:
