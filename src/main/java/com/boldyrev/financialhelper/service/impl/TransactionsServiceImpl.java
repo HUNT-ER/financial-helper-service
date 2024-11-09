@@ -1,11 +1,14 @@
 package com.boldyrev.financialhelper.service.impl;
 
 import com.boldyrev.dto.TransactionCreationDto;
+import com.boldyrev.dto.TransactionsFilter;
+import com.boldyrev.dto.TransactionsResponse;
 import com.boldyrev.financialhelper.dto.MessageDto;
 import com.boldyrev.financialhelper.dto.TransactionCategoryDto;
 import com.boldyrev.financialhelper.dto.TransactionDto;
 import com.boldyrev.financialhelper.enums.MessageType;
 import com.boldyrev.financialhelper.enums.RoutingKey;
+import com.boldyrev.financialhelper.enums.TransactionType;
 import com.boldyrev.financialhelper.enums.UserMessage;
 import com.boldyrev.financialhelper.exception.TransactionCategoryNotExistsException;
 import com.boldyrev.financialhelper.mapper.TransactionMapper;
@@ -18,6 +21,7 @@ import com.boldyrev.financialhelper.service.TransactionsService;
 import java.time.Instant;
 import java.util.List;
 import java.util.StringJoiner;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -62,6 +66,23 @@ public class TransactionsServiceImpl implements TransactionsService {
             .then(repository.save(mapper.fromTransactionCreationDto(transactionDto)))
             .flatMap(transaction -> checkSpendingLimit(transaction.getUserId()))
             .then();
+    }
+
+    @Override
+    public Mono<TransactionsResponse> getTransactionsByFilter(Long userId,
+        TransactionsFilter filter) {
+        TransactionType transactionType = TransactionType.valueOf(
+            filter.getTransactionType().name());
+
+        return repository.findAllByParameters(userId, filter.getCategoryId(), transactionType,
+                filter.getStartPeriod().toInstant(), filter.getEndPeriod().toInstant())
+            .collectList()
+            .map(mapper::toSpendingLimitsResponse);
+    }
+
+    @Override
+    public Mono<Void> deleteTransaction(UUID transactionId) {
+        return repository.deleteById(transactionId);
     }
 
     private Mono<Void> checkSpendingLimit(Long userId) {

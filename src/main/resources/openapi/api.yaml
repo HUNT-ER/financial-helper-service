@@ -33,6 +33,54 @@ paths:
         '201':
           description: 'Successfully created'
 
+  /api/v1/transactions/users/{userId}:
+    post:
+      tags:
+        - 'Transactions'
+      summary: 'Get user transactions'
+      operationId: getUserTransactions
+      parameters:
+        - name: userId
+          in: path
+          description: User ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      requestBody:
+        description: 'Transactions filter'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionsFilter'
+      responses:
+        '200':
+          description: 'Found transactions'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionsResponse'
+
+  /api/v1/transactions/{transactionId}:
+    delete:
+      tags:
+        - 'Transactions'
+      summary: 'Delete transaction'
+      operationId: deleteTransaction
+      parameters:
+        - name: transactionId
+          in: path
+          description: Transaction ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: 'Successful deletion'
+
+
   #########################################################
   #################  SPENDING LIMITS  #####################
   #########################################################
@@ -75,7 +123,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/SpendingLimitsResponse'
 
-  /api/v1/spending-limits/{userId}/{categoryId}:
+  /api/v1/spending-limits/users/{userId}/{categoryId}:
     delete:
       tags:
         - 'SpendingLimits'
@@ -98,7 +146,7 @@ paths:
             type: string
             format: uuid
       responses:
-        '200':
+        '204':
           description: 'Successful deletion'
 
 components:
@@ -115,8 +163,74 @@ components:
         - transactionType
         - amount
         - transactionDateTime
-      description: "Результат восстановления из архива"
       properties:
+        categoryId:
+          type: string
+          format: uuid
+          description: Category id
+        userId:
+          type: integer
+          format: int64
+          description: Telegram user id
+          minimum: 1
+        transactionType:
+          type: string
+          enum: [ INCOME, EXPENSE, TRANSFER ]
+        amount:
+          type: number
+          format: double
+          minimum: 1
+        transactionDateTime:
+          type: string
+          format: date-time
+
+    TransactionsFilter:
+      type: object
+      required:
+        - categoryId
+        - transactionType
+        - startPeriod
+        - endPeriod
+      properties:
+        categoryId:
+          type: string
+          format: uuid
+          description: Category id
+        transactionType:
+          type: string
+          enum: [ INCOME, EXPENSE, TRANSFER ]
+        startPeriod:
+          type: string
+          format: date-time
+        endPeriod:
+          type: string
+          format: date-time
+
+    TransactionsResponse:
+      type: object
+      required:
+        - transactions
+      properties:
+        transactions:
+          type: array
+          description: 'Array of transactions'
+          items:
+            $ref: "#/components/schemas/TransactionResponseDto"
+
+    TransactionResponseDto:
+      type: object
+      required:
+        - id
+        - categoryId
+        - userId
+        - transactionType
+        - amount
+        - transactionDateTime
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Transaction id
         categoryId:
           type: string
           format: uuid
