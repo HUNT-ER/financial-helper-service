@@ -45,4 +45,6 @@ public interface SpendingLimitsRepository extends ReactiveCrudRepository<Spendin
      * @return found {@link SpendingLimit}
      */
     Mono<SpendingLimit> findByUserIdAndCategoryId(Long userId, UUID categoryId);
+
+    Mono<Void> deleteByUserIdAndCategoryId(Long userId, UUID categoryId);
 }

@@ -2,10 +2,10 @@ package com.boldyrev.financialhelper.service;
 
 import com.boldyrev.dto.SpendingLimitCreationDto;
 import com.boldyrev.financialhelper.repository.projection.SpendingLimitCategoryProjection;
+import java.time.Instant;
+import java.util.UUID;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.time.Instant;
 
 /**
  * Service for operations with {@link com.boldyrev.financialhelper.model.SpendingLimit}.
@@ -25,9 +25,18 @@ public interface SpendingLimitsService {
     /**
      * Get all active limits;
      *
-     * @param userId user id;
-     * @param period instant of current time;
-     * @return active limits;
+     * @param userId user id
+     * @param period instant of current time
+     * @return active limits
      */
     Flux<SpendingLimitCategoryProjection> getActiveLimits(Long userId, Instant period);
+
+    /**
+     * Delete limit bi userId and categoryId.
+     *
+     * @param userId user id
+     * @param categoryId category id
+     * @return void
+     */
+    Mono<Void> deleteLimit(Long userId, UUID categoryId);
 }
