@@ -13,7 +13,8 @@ public enum UserMessage {
     RECEIPT_ALREADY_EXISTS("Error: You are trying to add an existing receipt."),
     INCORRECT_QR_CODE("Incorrect QR-code."),
     CATEGORIZATION_ERROR("Can't recognize QR-code. Try again later."),
-    SUCCESS_QR_CODE_READING("QR-code successfully read.");
+    SUCCESS_QR_CODE_READING("QR-code successfully read."),
+    SPENDING_LIMIT_EXCEEDED("Spending limit by some categories exceeded: %s");
 
     private final String message;
 

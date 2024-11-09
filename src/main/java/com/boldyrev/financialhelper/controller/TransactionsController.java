@@ -3,7 +3,6 @@ package com.boldyrev.financialhelper.controller;
 import com.boldyrev.controller.TransactionsApi;
 import com.boldyrev.dto.TransactionCreationDto;
 import com.boldyrev.financialhelper.service.TransactionsService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,9 +22,9 @@ public class TransactionsController implements TransactionsApi {
     private final TransactionsService transactionsService;
 
     @Override
-    public Mono<ResponseEntity<Void>> addTransaction(@Valid Mono<TransactionCreationDto> transactionDto,
+    public Mono<ResponseEntity<Void>> addTransaction(Mono<TransactionCreationDto> transactionDto,
         ServerWebExchange exchange) {
-       return transactionDto.flatMap(transactionsService::addTransaction)
+        return transactionDto.flatMap(transactionsService::addTransaction)
             .thenReturn(new ResponseEntity<>(HttpStatus.CREATED));
     }
 }

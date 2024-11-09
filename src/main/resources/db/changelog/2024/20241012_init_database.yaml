@@ -112,10 +112,20 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: limit
+                  name: spending_limit
                   type: decimal(10, 2)
                   constraints:
                     nullable: false
+              - column:
+                  name: start_period
+                  type: timestamp
+                  constraints:
+                    nullable: false
+              - column:
+                  name: end_period
+                  type: timestamp
+                  constraints:
+                    nullable: true
               - column:
                   name: created_at
                   type: timestamp
@@ -126,3 +136,7 @@ databaseChangeLog:
                   type: timestamp
                   constraints:
                     nullable: false
+        - addUniqueConstraint:
+            columnNames: category_id, user_id
+            tableName: spending_limits
+            constraintName: uq_spending_limits_category_user

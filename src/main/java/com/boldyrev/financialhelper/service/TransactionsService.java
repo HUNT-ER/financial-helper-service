@@ -22,7 +22,8 @@ public interface TransactionsService {
     Mono<Void> saveTransactions(List<TransactionDto> transactions);
 
     /**
-     * Saving new transaction;
+     * Saving new transaction.
+     *
      * @param transactionDto new transaction.
      * @return void
      */
