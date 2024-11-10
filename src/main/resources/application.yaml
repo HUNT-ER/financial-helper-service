@@ -1,7 +1,6 @@
 spring:
   application:
     name: financial-helper
-  #todo вынести все чувствительные данные в .env
   liquibase:
     enabled: true
     change-log: classpath:db/changelog/db.changelog-master.yaml
@@ -79,5 +78,5 @@ app:
     auth-url: ${GIGACHAT_AUTH_URL}
     auth-token: ${GIGACHAT_AUTH_TOKEN}
     generation-categories-prompt: ${GIGACHAT_GENERATION_PROMPT}
-    api-scope: GIGACHAT_API_PERS
+    api-scope: ${GIGACHAT_API_SCOPE}
   default-category: ${DEFAULT_CATEGORY:Other}

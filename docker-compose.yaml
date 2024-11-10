@@ -7,18 +7,17 @@ volumes:
 networks:
   mongo-network:
 
-
 services:
   postgres:
     image: postgres:16
     environment:
-      POSTGRES_DB: "finance-helper"
-      POSTGRES_USER: "postgres"
-      POSTGRES_PASSWORD: "0322"
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       PGDATA: "/var/lib/postgresql/data/pgdata"
     restart: always
     ports:
-      - "5439:5432"
+      - "${POSTGRES_EXTERNAL_PORT}:${POSTGRES_INTERNAL_PORT}"
     volumes:
       - postgres-data:/var/lib/postgresql/data
 
@@ -28,11 +27,11 @@ services:
     hostname: mongo
     restart: always
     environment:
-      MONGO_INITDB_ROOT_USERNAME: "root"
-      MONGO_INITDB_ROOT_PASSWORD: "0322"
+      MONGO_INITDB_ROOT_USERNAME: ${MONGODB_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD}
     command: mongod --replSet rs0 --keyFile /etc/mongo-keyfile/mongo-keyfile
     ports:
-      - "27017:27017"
+      - "${MONGODB_EXTERNAL_PORT}:${MONGODB_INTERNAL_PORT}"
     volumes:
       - mongodb_data:/data/db
       - ./mongo-keyfile:/etc/mongo-keyfile/mongo-keyfile:ro
@@ -45,14 +44,14 @@ services:
     depends_on:
       - mongodb
     command: >
-      mongosh --host -u root -p 0322 mongo:27017 --eval 
+      mongosh --host -u $MONGODB_USER -p $MONGODB_PASSWORD mongo:$MONGODB_EXTERNAL_PORT --eval 
       '
       config = {
       "_id" : "rs0",
       "members" : [
         {
           "_id" : 0,
-          "host" : "mongo:27017"
+          "host" : "mongo:$MONGODB_EXTERNAL_PORT"
         }
       ]
       };
@@ -65,27 +64,26 @@ services:
     image: mongo-express:latest
     container_name: mongo-express
     ports:
-      - "8081:8081"
+      - "${MONGO_EXPRESS_EXTERNAL_PORT}:${MONGO_EXPRESS_INTERNAL_PORT}"
     depends_on:
       - mongodb
     environment:
       ME_CONFIG_MONGODB_SERVER: "mongo"
-      ME_CONFIG_MONGODB_PORT: "27017"
-      ME_CONFIG_MONGODB_ADMINUSERNAME: "root"
-      ME_CONFIG_MONGODB_ADMINPASSWORD: "0322"
+      ME_CONFIG_MONGODB_PORT: ${MONGODB_EXTERNAL_PORT}
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGODB_USER}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGODB_PASSWORD}
     networks:
       - mongo-network
-  #todo вынести все чувствительные данные в .env
 
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq
     ports:
-      - "5672:5672"
-      - "15672:15672"
+      - "${RABBIT_MQ_EXTERNAL_PORT}:${RABBIT_MQ_INTERNAL_PORT}"
+      - "${RABBIT_MQ_EXTERNAL_MANAGEMENT_PORT}:${RABBIT_MQ_INTERNAL_MANAGEMENT_PORT}"
     environment:
-      RABBITMQ_DEFAULT_USER: admin
-      RABBITMQ_DEFAULT_PASS: admin
+      RABBITMQ_DEFAULT_USER: ${RABBIT_MQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBIT_MQ_PASSWORD}
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
 
@@ -94,10 +92,10 @@ services:
     container_name: keycloak_db
     environment:
       POSTGRES_HOST_AUTH_METHOD: trust
-      POSTGRES_USER: "keycloak_postgres"
-      POSTGRES_DB: "keycloak"
+      POSTGRES_USER: ${KEYCLOAK_DB_USER}
+      POSTGRES_DB: ${KEYCLOAK_DB}
     ports:
-      - "5434:5432"
+      - "${KEYCLOAK_DB_EXTERNAL_PORT}:${KEYCLOAK_DB_INTERNAL_PORT}"
     volumes:
       - keycloak_data:/var/lib/postgresql/data
 
@@ -108,22 +106,22 @@ services:
       - keycloak_db
     environment:
       KEYCLOAK_DATABASE_HOST: "keycloak_db"
-      KEYCLOAK_DATABASE_PORT: "5432"
-      KEYCLOAK_DATABASE_NAME: "keycloak"
-      KEYCLOAK_DATABASE_USER: "keycloak_postgres"
-      KEYCLOAK_DATABASE_PASSWORD:
-      KEYCLOAK_DATABASE_SCHEMA: "public"
-      KEYCLOAK_ADMIN_USER: "aboldyrev"
-      KEYCLOAK_ADMIN_PASSWORD: "changeme"
+      KEYCLOAK_DATABASE_PORT: ${KEYCLOAK_DB_EXTERNAL_PORT}
+      KEYCLOAK_DATABASE_NAME: ${KEYCLOAK_DB}
+      KEYCLOAK_DATABASE_USER: ${KEYCLOAK_DB_USER}
+      KEYCLOAK_DATABASE_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
+      KEYCLOAK_DATABASE_SCHEMA: ${KEYCLOAK_DB_SCHEMA}
+      KEYCLOAK_ADMIN_USER: ${KEYCLOAK_ADMIN_USER}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
     ports:
-      - "8910:8080"
+      - "${KEYCLOAK_EXTERNAL_PORT}:${KEYCLOAK_INTERNAL_PORT}"
 
   redis:
     image: redis:7.4.1
     container_name: redis
     ports:
-      - "6379:6379"
+      - "${REDIS_EXTERNAL_PORT}:${REDIS_INTERNAL_PORT}"
     environment:
-      - REDIS_PASSWORD=pass
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
     command: ["redis-server", "--requirepass", "$REDIS_PASSWORD"]
     restart: always
