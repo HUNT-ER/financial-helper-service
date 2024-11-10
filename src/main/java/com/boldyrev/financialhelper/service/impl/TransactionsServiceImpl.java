@@ -25,6 +25,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Mono;
 
 /**
@@ -47,12 +48,15 @@ public class TransactionsServiceImpl implements TransactionsService {
 
     private final TransactionMapper mapper;
 
+    private final TransactionalOperator r2dbcTransactionalOperator;
+
     @Override
     public Mono<Void> saveTransactions(List<TransactionDto> transactions) {
         log.debug("Saving transactions: {}", transactions);
         return repository.saveAll(transactions.stream().map(mapper::toEntity).toList())
             .next()
             .flatMap(transaction -> checkSpendingLimit(transaction.getUserId()))
+            .as(r2dbcTransactionalOperator::transactional)
             .then();
     }
 
@@ -65,6 +69,7 @@ public class TransactionsServiceImpl implements TransactionsService {
                     transactionDto.getCategoryId()))))
             .then(repository.save(mapper.fromTransactionCreationDto(transactionDto)))
             .flatMap(transaction -> checkSpendingLimit(transaction.getUserId()))
+            .as(r2dbcTransactionalOperator::transactional)
             .then();
     }
 
@@ -77,12 +82,14 @@ public class TransactionsServiceImpl implements TransactionsService {
         return repository.findAllByParameters(userId, filter.getCategoryId(), transactionType,
                 filter.getStartPeriod().toInstant(), filter.getEndPeriod().toInstant())
             .collectList()
+            .as(r2dbcTransactionalOperator::transactional)
             .map(mapper::toTransactionsResponse);
     }
 
     @Override
     public Mono<Void> deleteTransaction(UUID transactionId) {
-        return repository.deleteById(transactionId);
+        return repository.deleteById(transactionId)
+            .as(r2dbcTransactionalOperator::transactional);
     }
 
     private Mono<Void> checkSpendingLimit(Long userId) {

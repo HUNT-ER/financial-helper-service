@@ -11,6 +11,7 @@ import java.time.Instant;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -29,6 +30,8 @@ public class SpendingLimitsServiceImpl implements SpendingLimitsService {
 
     private final SpendingLimitMapper mapper;
 
+    private final TransactionalOperator r2dbcTransactionalOperator;
+
     @Override
     public Mono<Void> addSpendingLimit(SpendingLimitCreationDto limitDto) {
         return categoriesService.getCategories()
@@ -40,6 +43,7 @@ public class SpendingLimitsServiceImpl implements SpendingLimitsService {
             .flatMap(existedLimit -> Mono.just(mapper.updateSpendingLimit(existedLimit, limitDto)))
             .switchIfEmpty(Mono.just(mapper.fromSpendingLimitCreationDto(limitDto)))
             .flatMap(limitsRepository::save)
+            .as(r2dbcTransactionalOperator::transactional)
             .then();
     }
 
@@ -50,6 +54,7 @@ public class SpendingLimitsServiceImpl implements SpendingLimitsService {
 
     @Override
     public Mono<Void> deleteLimit(Long userId, UUID categoryId) {
-        return limitsRepository.deleteByUserIdAndCategoryId(userId, categoryId);
+        return limitsRepository.deleteByUserIdAndCategoryId(userId, categoryId)
+            .as(r2dbcTransactionalOperator::transactional);
     }
 }
