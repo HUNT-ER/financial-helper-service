@@ -34,7 +34,7 @@ public interface TransactionMapper {
 
     List<TransactionResponseDto> toListTransactionResponseDto(List<Transaction> transactions);
 
-    default TransactionsResponse toSpendingLimitsResponse(List<Transaction> transactions) {
+    default TransactionsResponse toTransactionsResponse(List<Transaction> transactions) {
         return new TransactionsResponse(toListTransactionResponseDto(transactions));
     }
 

@@ -77,7 +77,7 @@ public class TransactionsServiceImpl implements TransactionsService {
         return repository.findAllByParameters(userId, filter.getCategoryId(), transactionType,
                 filter.getStartPeriod().toInstant(), filter.getEndPeriod().toInstant())
             .collectList()
-            .map(mapper::toSpendingLimitsResponse);
+            .map(mapper::toTransactionsResponse);
     }
 
     @Override

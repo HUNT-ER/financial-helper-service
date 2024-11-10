@@ -7,9 +7,10 @@ info:
 tags:
   - name: 'Transactions'
     description: 'Transactions API'
-  - name: 'SpendingLimits'
+  - name: 'Spending Limits'
     description: 'Spending Limits API'
-  - name: 'TransactionCategories'
+  - name: 'Transaction Categories'
+    description: 'Transaction Categories API'
 
 paths:
 
@@ -20,7 +21,7 @@ paths:
   /api/v1/transactions:
     post:
       tags:
-        - Transactions
+        - 'Transactions'
       summary: 'Create new transaction'
       operationId: addTransaction
       requestBody:
@@ -80,6 +81,23 @@ paths:
         '204':
           description: 'Successful deletion'
 
+  #########################################################
+  ##############  TRANSACTION CATEGORIES  #################
+  #########################################################
+
+  /api/v1/transaction-categories:
+    get:
+      tags:
+        - 'Transaction Categories'
+      summary: 'Getting all transaction categories'
+      operationId: getAllTransactionCategories
+      responses:
+        '200':
+          description: 'All transaction categories'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionCategoriesResponse'
 
   #########################################################
   #################  SPENDING LIMITS  #####################
@@ -88,7 +106,7 @@ paths:
   /api/v1/spending-limits:
     put:
       tags:
-        - 'SpendingLimits'
+        - 'Spending Limits'
       summary: 'Add new spending limit'
       operationId: addSpendingLimit
       requestBody:
@@ -103,7 +121,7 @@ paths:
 
     get:
       tags:
-        - 'SpendingLimits'
+        - 'Spending Limits'
       summary: 'Getting all user limits'
       operationId: getAllUserLimits
       parameters:
@@ -123,10 +141,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/SpendingLimitsResponse'
 
-  /api/v1/spending-limits/users/{userId}/{categoryId}:
+  /api/v1/spending-limits/users/{userId}/categories/{categoryId}:
     delete:
       tags:
-        - 'SpendingLimits'
+        - 'Spending Limits'
       summary: 'Delete spending limit'
       operationId: deleteLimit
       parameters:
@@ -250,6 +268,39 @@ components:
         transactionDateTime:
           type: string
           format: date-time
+
+  #########################################################
+  #################  SPENDING LIMITS  #####################
+  #########################################################
+
+    TransactionCategoriesResponse:
+      type: object
+      required:
+        - categories
+      properties:
+        categories:
+          type: array
+          description: 'Array of transaction categories'
+          items:
+            $ref: "#/components/schemas/TransactionCategoryResponseDto"
+
+    TransactionCategoryResponseDto:
+      type: object
+      required:
+        - id
+        - categoryName
+        - isExpense
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Category id
+        categoryName:
+          type: string
+          description: Category name
+        isExpense:
+          type: boolean
+          description: Is expense category
 
   #########################################################
   #################  SPENDING LIMITS  #####################
