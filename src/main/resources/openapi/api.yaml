@@ -7,14 +7,21 @@ info:
 tags:
   - name: 'Transactions'
     description: 'Transactions API'
-  - name: 'SpendingLimits'
+  - name: 'Spending Limits'
     description: 'Spending Limits API'
+  - name: 'Transaction Categories'
+    description: 'Transaction Categories API'
 
 paths:
+
+  #########################################################
+  ###################  TRANSACTIONS  ######################
+  #########################################################
+
   /api/v1/transactions:
     post:
       tags:
-        - Transactions
+        - 'Transactions'
       summary: 'Create new transaction'
       operationId: addTransaction
       requestBody:
@@ -27,10 +34,79 @@ paths:
         '201':
           description: 'Successfully created'
 
+  /api/v1/transactions/users/{userId}:
+    post:
+      tags:
+        - 'Transactions'
+      summary: 'Get user transactions'
+      operationId: getUserTransactions
+      parameters:
+        - name: userId
+          in: path
+          description: User ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      requestBody:
+        description: 'Transactions filter'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionsFilter'
+      responses:
+        '200':
+          description: 'Found transactions'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionsResponse'
+
+  /api/v1/transactions/{transactionId}:
+    delete:
+      tags:
+        - 'Transactions'
+      summary: 'Delete transaction'
+      operationId: deleteTransaction
+      parameters:
+        - name: transactionId
+          in: path
+          description: Transaction ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: 'Successful deletion'
+
+  #########################################################
+  ##############  TRANSACTION CATEGORIES  #################
+  #########################################################
+
+  /api/v1/transaction-categories:
+    get:
+      tags:
+        - 'Transaction Categories'
+      summary: 'Getting all transaction categories'
+      operationId: getAllTransactionCategories
+      responses:
+        '200':
+          description: 'All transaction categories'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionCategoriesResponse'
+
+  #########################################################
+  #################  SPENDING LIMITS  #####################
+  #########################################################
+
   /api/v1/spending-limits:
     put:
       tags:
-        - SpendingLimits
+        - 'Spending Limits'
       summary: 'Add new spending limit'
       operationId: addSpendingLimit
       requestBody:
@@ -43,43 +119,59 @@ paths:
         '201':
           description: 'Successfully created'
 
-
-  /quotes/{symbol}:
     get:
       tags:
-        - quotes
-      summary: Get current quote for a security
-      operationId: getQuote
+        - 'Spending Limits'
+      summary: 'Getting all user limits'
+      operationId: getAllUserLimits
       parameters:
-        - name: symbol
-          in: path
+        - name: userId
+          in: query
           required: true
-          description: Security's symbol
+          description: User ID
           schema:
-            type: string
-            pattern: '[A-Z0-9]+'
+            type: integer
+            format: int64
+            minimum: 1
       responses:
         '200':
-          description: OK
+          description: 'All user limits'
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/QuoteDto'
+                $ref: '#/components/schemas/SpendingLimitsResponse'
+
+  /api/v1/spending-limits/users/{userId}/categories/{categoryId}:
+    delete:
+      tags:
+        - 'Spending Limits'
+      summary: 'Delete spending limit'
+      operationId: deleteLimit
+      parameters:
+        - name: userId
+          in: path
+          description: User ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: categoryId
+          in: path
+          description: Category ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: 'Successful deletion'
+
 components:
   schemas:
-    QuoteDto:
-      description: Quote response
-      type: object
-      properties:
-        symbol:
-          type: string
-          description: security's symbol
-        price:
-          type: number
-          description: Quote value
-        timestamp:
-          type: string
-          format: date-time
+  #########################################################
+  ###################  TRANSACTIONS  ######################
+  #########################################################
 
     TransactionCreationDto:
       type: object
@@ -89,7 +181,6 @@ components:
         - transactionType
         - amount
         - transactionDateTime
-      description: "Результат восстановления из архива"
       properties:
         categoryId:
           type: string
@@ -111,7 +202,155 @@ components:
           type: string
           format: date-time
 
+    TransactionsFilter:
+      type: object
+      required:
+        - categoryId
+        - transactionType
+        - startPeriod
+        - endPeriod
+      properties:
+        categoryId:
+          type: string
+          format: uuid
+          description: Category id
+        transactionType:
+          type: string
+          enum: [ INCOME, EXPENSE, TRANSFER ]
+        startPeriod:
+          type: string
+          format: date-time
+        endPeriod:
+          type: string
+          format: date-time
+
+    TransactionsResponse:
+      type: object
+      required:
+        - transactions
+      properties:
+        transactions:
+          type: array
+          description: 'Array of transactions'
+          items:
+            $ref: "#/components/schemas/TransactionResponseDto"
+
+    TransactionResponseDto:
+      type: object
+      required:
+        - id
+        - categoryId
+        - userId
+        - transactionType
+        - amount
+        - transactionDateTime
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Transaction id
+        categoryId:
+          type: string
+          format: uuid
+          description: Category id
+        userId:
+          type: integer
+          format: int64
+          description: Telegram user id
+          minimum: 1
+        transactionType:
+          type: string
+          enum: [ INCOME, EXPENSE, TRANSFER ]
+        amount:
+          type: number
+          format: double
+          minimum: 1
+        transactionDateTime:
+          type: string
+          format: date-time
+
+  #########################################################
+  #################  SPENDING LIMITS  #####################
+  #########################################################
+
+    TransactionCategoriesResponse:
+      type: object
+      required:
+        - categories
+      properties:
+        categories:
+          type: array
+          description: 'Array of transaction categories'
+          items:
+            $ref: "#/components/schemas/TransactionCategoryResponseDto"
+
+    TransactionCategoryResponseDto:
+      type: object
+      required:
+        - id
+        - categoryName
+        - isExpense
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Category id
+        categoryName:
+          type: string
+          description: Category name
+        isExpense:
+          type: boolean
+          description: Is expense category
+
+  #########################################################
+  #################  SPENDING LIMITS  #####################
+  #########################################################
+
     SpendingLimitCreationDto:
+      type: object
+      required:
+        - categoryId
+        - userId
+        - spendingLimit
+        - startPeriod
+        - endPeriod
+      properties:
+        categoryId:
+          type: string
+          format: uuid
+          description: Category id
+        userId:
+          type: integer
+          format: int64
+          description: Telegram user id
+          minimum: 1
+        spendingLimit:
+          type: number
+          format: double
+          minimum: 0.1
+          description: Spending limit
+        startPeriod:
+          type: string
+          format: date-time
+          description: Start date of the period
+        endPeriod:
+          type: string
+          format: date-time
+          description: End date of the period
+          nullable: true
+
+    SpendingLimitsResponse:
+      type: object
+      required:
+        - spendingLimits
+      properties:
+        spendingLimits:
+          type: array
+          description: 'Array of spending limits'
+          items:
+            $ref: "#/components/schemas/SpendingLimitResponseDto"
+
+    SpendingLimitResponseDto:
       type: object
       required:
         - categoryId

@@ -8,6 +8,7 @@ import com.boldyrev.financialhelper.repository.projection.SpendingLimitCategoryP
 import com.boldyrev.financialhelper.service.SpendingLimitsService;
 import com.boldyrev.financialhelper.service.TransactionCategoriesService;
 import java.time.Instant;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -45,5 +46,10 @@ public class SpendingLimitsServiceImpl implements SpendingLimitsService {
     @Override
     public Flux<SpendingLimitCategoryProjection> getActiveLimits(Long userId, Instant period) {
         return limitsRepository.findActiveLimits(userId, period);
+    }
+
+    @Override
+    public Mono<Void> deleteLimit(Long userId, UUID categoryId) {
+        return limitsRepository.deleteByUserIdAndCategoryId(userId, categoryId);
     }
 }
